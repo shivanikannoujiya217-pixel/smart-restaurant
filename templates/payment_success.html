@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Payment Successful</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#ff512f,#dd2476);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* Card */
+.card{
+    background:white;
+    padding:40px;
+    border-radius:20px;
+    text-align:center;
+    width:400px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.3);
+
+    animation: popup 0.6s ease;
+}
+
+@keyframes popup{
+    from{
+        transform:scale(0.5);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+/* Check animation */
+
+.checkmark{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    background:#28a745;
+    margin:auto;
+    position:relative;
+    animation: pop 0.5s ease;
+}
+
+@keyframes pop{
+    0%{transform:scale(0);}
+    100%{transform:scale(1);}
+}
+
+.checkmark:after{
+    content:'✔';
+    color:white;
+    font-size:40px;
+    position:absolute;
+    top:15px;
+    left:22px;
+}
+
+/* Text */
+
+.title{
+    font-size:28px;
+    margin-top:15px;
+}
+
+.order{
+    margin-top:10px;
+    color:#555;
+}
+
+/* WhatsApp animation */
+
+.whatsapp{
+    margin-top:20px;
+    font-size:18px;
+    color:#25D366;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink{
+    0%{opacity:1;}
+    50%{opacity:0.3;}
+    100%{opacity:1;}
+}
+
+/* Button */
+
+.btn{
+    margin-top:25px;
+    display:inline-block;
+    padding:12px 25px;
+    background:#25D366;
+    color:white;
+    text-decoration:none;
+    border-radius:25px;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.btn:hover{
+    transform:scale(1.1);
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="card">
+
+    <div class="checkmark"></div>
+
+    <div class="title">
+        Payment Successful
+    </div>
+
+    <div class="order">
+        Order ID: {{ order.id }}
+    </div>
+
+    <div class="whatsapp">
+        Sending Bill to WhatsApp...
+    </div>
+
+    <a href="/bill/{{ order.id }}" class="btn">
+        View Bill
+    </a>
+
+</div>
+
+
+<script>
+
+function sendWhatsApp(){
+
+let phone="{{ order.phone }}";
+
+let message="Hello {{ order.customer_name }}, Payment Successful. Order ID: {{ order.id }} Download Bill: http://127.0.0.1:5000/bill/{{ order.id }}";
+
+let url="https://wa.me/"+phone+"?text="+encodeURIComponent(message);
+
+window.open(url,"_blank");
+
+}
+
+setTimeout(sendWhatsApp,3000);
+
+</script>
+
+</body>
+</html>

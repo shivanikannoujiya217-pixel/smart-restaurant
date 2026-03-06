@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Menu Manager</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;padding:20px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #f1e6e6;padding:8px}
+    input,select{padding:6px;margin-right:8px}
+    button{padding:6px 10px}
+  </style>
+</head>
+<body>
+  <h1>Menu Manager</h1>
+
+  <h3>Add / Edit Item</h3>
+  <div>
+    <input id="itemId" type="hidden">
+    <input id="name" placeholder="Name">
+    <input id="category" placeholder="Category">
+    <input id="price" placeholder="Price" type="number" step="0.01">
+    <button onclick="saveItem()">Save</button>
+    <button onclick="resetForm()">Reset</button>
+  </div>
+
+  <h3>Items</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead>
+    <tbody id="itemsBody"></tbody>
+  </table>
+
+  <p><a href="/admin">Back to Dashboard</a></p>
+
+  <script>
+    async function load(){
+      const res = await fetch('/api/admin/menu');
+      const data = await res.json();
+      const body = document.getElementById('itemsBody');
+      body.innerHTML = '';
+      data.forEach(i => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i.id}</td>
+          <td>${i.name}</td>
+          <td>${i.category}</td>
+          <td>₹${i.price}</td>
+          <td>
+            <button onclick="edit(${i.id})">Edit</button>
+            <button onclick="del(${i.id})">Delete</button>
+          </td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    function resetForm(){
+      document.getElementById('itemId').value = '';
+      document.getElementById('name').value = '';
+      document.getElementById('category').value = '';
+      document.getElementById('price').value = '';
+    }
+
+    async function saveItem(){
+      const id = document.getElementById('itemId').value;
+      const payload = {name:document.getElementById('name').value, category:document.getElementById('category').value, price:document.getElementById('price').value};
+      if(!payload.name) return alert('Name required');
+      if(id){
+        await fetch('/api/admin/menu/'+id, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+      } else {
+        await fetch('/api/admin/menu', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+      }
+      resetForm();
+      load();
+    }
+
+    async function edit(id){
+      const res = await fetch('/api/admin/menu');
+      const items = await res.json();
+      const it = items.find(x=>x.id===id);
+      if(!it) return;
+      document.getElementById('itemId').value = it.id;
+      document.getElementById('name').value = it.name;
+      document.getElementById('category').value = it.category;
+      document.getElementById('price').value = it.price;
+    }
+
+    async function del(id){
+      if(!confirm('Delete item?')) return;
+      await fetch('/api/admin/menu/'+id, {method:'DELETE'});
+      load();
+    }
+
+    load();
+    // Socket.IO to auto-refresh if menu changes elsewhere
+    (function(){
+      const s = document.createElement('script');
+      s.src = 'https://cdn.socket.io/4.5.4/socket.io.min.js';
+      s.onload = function(){
+        try{
+          const socket = io();
+          socket.on('menu_changed', function(d){ console.log('menu_changed', d); load(); });
+        }catch(e){ console.warn('Socket.IO not available', e); }
+      };
+      document.body.appendChild(s);
+    })();
+  </script>
+</body>
+</html>

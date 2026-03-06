@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard – Smart Restaurant</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:Poppins,sans-serif;
+  background:#0b1220;
+  color:#fff;
+}
+header{
+  background:#0f172a;
+  padding:16px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 6px 20px rgba(0,0,0,.4);
+}
+h1{margin:0;font-size:20px}
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+.card{
+  background:linear-gradient(180deg,#111827,#020617);
+  padding:16px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.6);
+}
+.card small{
+  color:#9ca3af;
+}
+.card h2{
+  margin:8px 0 0;
+}
+.orders{
+  margin-top:30px;
+}
+.order{
+  background:#020617;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:12px;
+  border:1px solid rgba(255,255,255,.05);
+}
+.order-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.badge{
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+.paid{background:#14532d;color:#86efac}
+.pending{background:#7c2d12;color:#fed7aa}
+button{
+  background:#ff5733;
+  border:none;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+button.small{
+  padding:6px 10px;
+  font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🧑‍💼 Admin Dashboard</h1>
+  <button onclick="clearAll()">Clear All Orders</button>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="cards">
+    <div class="card">
+      <small>Total Orders</small>
+      <h2 id="totalOrders">0</h2>
+    </div>
+    <div class="card">
+      <small>Total Sales</small>
+      <h2>₹<span id="totalSales">0</span></h2>
+    </div>
+    <div class="card">
+      <small>Paid Orders</small>
+      <h2 id="paidOrders">0</h2>
+    </div>
+    <div class="card">
+      <small>Pending Payments</small>
+      <h2 id="pendingOrders">0</h2>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="orders">
+    <h2>📦 Recent Orders</h2>
+    <div id="ordersList"></div>
+  </div>
+
+
+
+{% for order in orders %}
+<tr>
+    <td>{{ order.id }}</td>
+    
+</tr>
+{% endfor %}
+</table>
+
+</div>
+
+<script>
+let orders = [];
+
+function loadOrders(){
+  const data = localStorage.getItem("sr_orders");
+  orders = data ? JSON.parse(data) : [];
+}
+
+function renderDashboard(){
+  document.getElementById("totalOrders").innerText = orders.length;
+
+  let totalSales = 0;
+  let paid = 0;
+  let pending = 0;
+
+  orders.forEach(o=>{
+    if(o.paid){
+      totalSales += o.total;
+      paid++;
+    } else {
+      pending++;
+    }
+  });
+
+  document.getElementById("totalSales").innerText = totalSales;
+  document.getElementById("paidOrders").innerText = paid;
+  document.getElementById("pendingOrders").innerText = pending;
+
+  renderOrders();
+}
+
+function renderOrders(){
+  const list = document.getElementById("ordersList");
+  list.innerHTML = "";
+
+  if(orders.length === 0){
+    list.innerHTML = "<p>No orders yet</p>";
+    return;
+  }
+
+  orders.forEach(o=>{
+    const div = document.createElement("div");
+    div.className = "order";
+
+    div.innerHTML = `
+      <div class="order-header">
+        <div>
+          <b>${o.id}</b><br>
+          <small>Table ${o.table} • ${new Date(o.ts).toLocaleString()}</small>
+        </div>
+        <div>
+          <span class="badge ${o.paid ? 'paid':'pending'}">
+            ${o.paid ? 'PAID':'PENDING'}
+          </span>
+        </div>
+      </div>
+
+      <ul>
+        ${o.items.map(i=>`
+          <li>${i.name} x${i.qty} – ₹${i.price*i.qty}</li>
+        `).join("")}
+      </ul>
+
+      <b>Total: ₹${o.total}</b><br><br>
+
+      ${!o.paid ? `<button class="small" onclick="markPaid('${o.id}')">Mark as Paid</button>` : ''}
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+function markPaid(id){
+  const ord = orders.find(o=>o.id===id);
+  if(!ord) return;
+
+  ord.paid = true;
+  ord.paymentTs = Date.now();
+  localStorage.setItem("sr_orders", JSON.stringify(orders));
+  renderDashboard();
+}
+
+function clearAll(){
+  if(!confirm("Delete all orders?")) return;
+  localStorage.removeItem("sr_orders");
+  orders = [];
+  renderDashboard();
+}
+
+loadOrders();
+renderDashboard();
+</script>
+
+</body>
+</html>

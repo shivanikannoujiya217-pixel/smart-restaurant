@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Smart Restaurant</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f7fb; --card:#fff; --accent:#ff5733; --muted:#6b7280;
+    --shadow: 0 8px 30px rgba(16,24,40,0.06); --radius:12px; --dash-width:420px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Poppins",sans-serif;background:linear-gradient(180deg,#f6f7fb 0%, #f0f3f8 100%);color:#111827;-webkit-font-smoothing:antialiased}
+  header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:16px 20px;background:linear-gradient(90deg,#0f172a,#0b1220);color:white;position:sticky;top:0;z-index:120;box-shadow: 0 4px 18px rgba(2,6,23,0.3)}
+  .brand{display:flex;gap:12px;align-items:center;font-weight:700;font-size:18px}
+  .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff2e00);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;box-shadow:0 6px 18px rgba(255,87,51,0.18)}
+  .header-right{display:flex;gap:12px;align-items:center}
+  .table-box{background:#fff;padding:8px 12px;border-radius:10px;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow)}
+  .table-box input{width:110px;padding:8px;border-radius:8px;border:1px solid #e6e9ef;font-weight:600}
+  .dash-toggle{background:transparent;border:1px solid rgba(255,255,255,0.12);color:white;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+  .wrap{display:flex;gap:18px;max-width:1200px;margin:18px auto;padding:0 18px}
+  main{flex:1}
+  .search-sort-box{display:flex;gap:12px;justify-content:center;padding:14px 0;flex-wrap:wrap;align-items:center}
+  .search{display:flex;gap:8px;align-items:center;width:420px;max-width:92%;background:var(--card);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow)}
+  .search input{border:none;outline:none;font-size:15px;padding:8px;width:100%;background:transparent}
+  select{padding:10px 14px;border-radius:12px;border:1px solid #e6e9ef;background:var(--card);font-weight:600;box-shadow:var(--shadow)}
+  .steps{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .step{background:var(--card);padding:8px 12px;border-radius:8px;box-shadow:var(--shadow);font-weight:700;color:var(--muted)}
+  .step.active{background:linear-gradient(90deg,var(--accent),#ff2e00);color:white}
+  .menu{display:grid;grid-template-columns: repeat(auto-fit,minmax(240px,1fr));gap:20px;padding:12px 0}
+  .menu-card{background:var(--card);border-radius:var(--radius);overflow:hidden;cursor:pointer;box-shadow:var(--shadow);transition:transform .28s, box-shadow .28s;display:flex;flex-direction:column}
+  .menu-card:hover{ transform:translateY(-6px) scale(1.02); box-shadow: 0 20px 40px rgba(2,6,23,0.12); }
+  .menu-card .img-wrap{position:relative;overflow:hidden}
+  .menu-card img{width:100%;height:160px;object-fit:cover;display:block;transition:transform .5s}
+  .menu-card .meta{ padding:12px; display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .menu-card h3{margin:0;font-size:16px}
+  .menu-card .desc{color:var(--muted);font-size:13px}
+  .popup{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(rgba(3,7,18,0.45),rgba(3,7,18,0.45));backdrop-filter: blur(4px);z-index:200;padding:18px}
+  .popup-content{width:100%;max-width:960px;background:var(--card);border-radius:14px;padding:18px;box-shadow:0 18px 60px rgba(2,6,23,0.25);max-height:86vh;overflow:auto;transform-origin:center;animation:popupIn .22s ease}
+  @keyframes popupIn{from{transform:translateY(8px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+  .popup-grid{display:grid;grid-template-columns: repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+  .dish{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;border:1px solid #f0f0f5;background:#fff;transition:transform .18s, box-shadow .18s}
+  .dish:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(2,6,23,0.06)}
+  .dish img{width:78px;height:66px;object-fit:cover;border-radius:8px}
+  .dish .left{flex:1}
+  .dish .price{font-weight:700}
+  .dish button{background:var(--accent);border:none;color:white;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+  #cart{position:fixed;right:-420px;top:0;width:380px;height:100%;background:var(--card);box-shadow:-12px 0 40px rgba(2,6,23,0.12);transition:right .45s cubic-bezier(.2,.9,.3,1);z-index:195;padding:18px;overflow:auto;border-left:1px solid #f0f1f6}
+  #cart.open{right:0}
+  #cart h2{margin:0 0 8px 0}
+  .cart-items{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+  .cart-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;border-radius:10px;background:#fbfbfd;border:1px solid #f2f3f8}
+  .cart-left{display:flex;gap:8px;align-items:center;flex:1}
+  .qty-control{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:86px}
+  .qty-control button{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:6px 8px;border-radius:8px;cursor:pointer;font-weight:700}
+  .qty-num{font-weight:800}
+  .cart-footer{position:sticky;bottom:0;background:transparent;padding-top:10px;margin-top:10px}
+  #dashboard{position:fixed;right:calc(-1 * var(--dash-width));top:0;width:var(--dash-width);height:100%;background:#0b1220;color:white;z-index:210;box-shadow:-20px 0 60px rgba(2,6,23,0.45);transition:right .45s cubic-bezier(.2,.9,.3,1);padding:18px;overflow:auto}
+  #dashboard.open{right:0}
+  .dash-card{background:linear-gradient(180deg,#0f172a,#09111a);padding:12px;border-radius:12px;margin-bottom:12px;box-shadow:0 10px 30px rgba(1,4,10,0.6);border:1px solid rgba(255,255,255,0.04)}
+  .dash-stat{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:18px;margin-bottom:6px}
+  .muted-dash{color:rgba(255,255,255,0.6);font-weight:500;font-size:13px}
+  .orders-list{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+  .order-row{background:linear-gradient(180deg,#061022,#09111a);padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .small-badge{background:rgba(255,87,51,0.12);color:var(--accent);padding:6px 8px;border-radius:999px;font-weight:700}
+  .chart-wrap{background:linear-gradient(180deg,#08111a,#071018);padding:12px;border-radius:12px}
+  canvas{display:block;width:100%;height:120px}
+  .floating-cart{position:fixed;right:20px;bottom:20px;background:linear-gradient(135deg,var(--accent),#ff2e00);width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;color:white;z-index:200;box-shadow:0 18px 50px rgba(255,87,51,0.18);cursor:pointer;transition:transform .18s}
+  .floating-cart:hover{transform:translateY(-6px)}
+  .badge{position:absolute;top:-6px;right:-6px;background:#06122b;color:white;padding:6px 8px;border-radius:999px;font-weight:700;font-size:12px;box-shadow:0 6px 20px rgba(2,6,23,0.12)}
+  @media (max-width:960px){ :root{--dash-width:360px} #dashboard{width:var(--dash-width)} }
+  @media (max-width:700px){ .wrap{padding:0 12px} }
+  .muted{color:var(--muted)}
+  .btn{background:var(--accent);color:white;padding:10px 14px;border-radius:10px;border:none;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(255,87,51,0.12)}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid #e9e9ef}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">SR</div>
+    <div><div style="font-size:14px;opacity:.95">Smart Restaurant</div></div>
+  </div>
+
+  <div class="header-right">
+    <div class="table-box">
+      <div>
+        <label style="font-weight:700;color:#111">Table No:</label>
+        <input id="tableNumber" type="number" min="1" max="10"placeholder="Table">
+      </div>
+    </div>
+
+    <button id="cartToggle" class="btn" style="display:flex;align-items:center;gap:8px"> 🛒 Cart </button>
+
+  </div>
+</header>
+
+<!-- Order tracker widget (hidden until an order is placed) -->
+<div id="orderTracker" style="position:fixed;left:20px;bottom:90px;z-index:220;display:none">
+  <div style="background:#fff;padding:10px;border-radius:12px;box-shadow:0 8px 30px rgba(16,24,40,0.08);display:flex;gap:8px;align-items:center">
+    <div id="trackerText" style="font-weight:700">Order</div>
+    <button id="trackerBtn" style="padding:8px 12px;border-radius:10px;border:none;cursor:pointer">Status</button>
+  </div>
+</div>
+
+<div class="search-sort-box" style="max-width:1200px;margin:12px auto;padding:0 18px">
+  <div class="search" title="Search categories or dishes">
+    <span class="icon">🔎</span>
+    <input id="search" placeholder="Search categories or dishes..." />
+  </div>
+
+  <select id="sort" title="Sort dishes (when category open)">
+    <option value="default">Sort By</option>
+    <option value="low">Price: Low to High</option>
+    <option value="high">Price: High to Low</option>
+  </select>
+
+  <select id="stateFilter" title="Filter by category (optional)">
+    <option value="all">All Categories</option>
+  </select>
+</div>
+
+<div class="wrap" role="main">
+  <main>
+    <div class="steps">
+      <div class="step active" id="stepBrowse">1. Browse</div>
+      <div class="step" id="stepView">2. View Dishes</div>
+      <div class="step" id="stepCart">3. Cart</div>
+      <div class="step" id="stepPlace">4. Place Order</div>
+    </div>
+
+    <section class="menu" id="menu"></section>
+  </main>
+</div>
+
+<!-- Category / dishes popup -->
+<div class="popup" id="popup"><div class="popup-content" id="popupContent"></div></div>
+
+<!-- Cart -->
+<aside id="cart" aria-live="polite">
+  <h2>Your Cart</h2>
+  <div class="cart-items" id="cartItems"></div>
+  <div style="margin-top:12px" class="muted">Table: <span id="cartTable">—</span></div>
+  <div class="cart-footer">
+    <h3 style="margin:10px 0">Total: ₹<span id="totalPrice">0</span></h3>
+    <div style="display:flex;gap:10px">
+      <button id="placeOrderBtn" class="btn" style="flex:1">Place Order</button>
+      <button id="clearCartBtn" class="btn ghost" style="flex:0 0 auto">Clear</button>
+    </div>
+  </div>
+</aside>
+
+<!-- Floating cart -->
+<div class="floating-cart" id="floatingCart" title="Open cart">
+  <div style="font-size:20px">🛒</div>
+  <div class="badge" id="cartCount">0</div>
+</div>
+
+<!-- Order confirmation popup -->
+<div class="popup order-popup" id="orderPopup">
+  <div class="popup-content order-box" style="max-width:520px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>Confirm Order</h3>
+      <button id="closeOrderPopup" class="btn ghost">Close</button>
+    </div>
+
+    <div class="muted" style="font-size:13px">Table No: <strong id="orderTable">—</strong></div>
+
+    <div class="order-list" id="orderList"></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <div class="muted">Total</div>
+      <div style="font-weight:800;font-size:18px">₹<span id="orderTotal">0</span></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button id="confirmOrderBtn" class="btn" style="flex:1">Confirm & Place Order</button>
+      <button id="editCartBtn" class="btn ghost" style="flex:0 0 auto">Edit Cart</button>
+    </div>
+  </div>
+</div>
+
+<div class="popup" id="paymentPopup">
+  <div class="popup-content" style="max-width:400px;text-align:center">
+
+    <div id="paymentModal" class="modal">
+  <div class="modal-content">
+
+    <h3>Select Payment</h3>
+
+    <button onclick="showQR()">QR</button>
+    <button onclick="showCard()">Card</button>
+
+    <div id="qrSection" class="payment-box">
+        <p>QR Payment</p>
+       <img src="/static/d020cd8f-bb01-4fc4-97ac-6f87d92cff90.jpg" alt="Payment QR Code" style="width:200px;height:200px;border-radius:8px;margin:20px 0">
+    </div>
+
+    <div id="cardSection" class="payment-box">
+        <p>Card Payment</p>
+        <input type="text" placeholder="Card Number">
+    </div>
+
+    <br>
+    <button onclick="closePayment()">Close</button>
+
+  </div>
+</div>
+    <div class="muted" style="margin:10px 0">Scan the QR code to pay ₹<span id="paymentAmount">0</span></div>
+   
+
+    <div style="margin:20px 0;padding:15px;border:2px solid #ff6b35;border-radius:8px;background:#fff5f0">
+    
+    
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button id="paymentDoneBtn" class="btn" style="flex:1;background:#28a745">✅ Payment Done</button>
+      <button id="closePaymentPopup" class="btn ghost">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* --------------------
+   Project uses exact folders detected in your screenshot:
+   desserts, gujarati, maharashtrian, non_veg, punjabi, south_indian, Vegetarian
+   Images are expected at:
+     static/images/<folder>/<file>.jpg
+   -------------------- */
+const categories = [
+  {
+    name: "Maharashtrian",
+    folder:"maharashtrian",
+    img:"static/images/maharashtrian/cover.jpg",
+    dishes:[
+      {name:"Misal Pav", price:80,img:"static/images/maharashtrian/misal_pav.jpg", category:"Maharashtrian"},
+      {name:"Puran Poli", price:60, img:"static/images/maharashtrian/puran_poli.jpg", category:"Maharashtrian"},
+      {name:"Sabudana Khichdi", price:70, img:"static/images/maharashtrian/sabudana_khichdi.jpg", category:"Maharashtrian"},
+      {name:"Vada Pav", price:30, img:"static/images/maharashtrian/vada_pav.jpg", category:"Maharashtrian"}
+    ]
+  },
+
+  {
+    name: "South Indian",
+    folder:"south_indian",
+    img:"static/images/south_indian/cover.jpg",
+    dishes:[
+      {name:"Masala Dosa", price:90, img:"static/images/south_indian/masala_dosa.jpg", category:"South Indian"},
+      {name:"Idli Sambar", price:50, img:"static/images/south_indian/idli_sambar.jpg", category:"South Indian"},
+      {name:"Upma", price:40, img:"static/images/south_indian/upma.jpg", category:"South Indian"},
+      {name:"Medu Vada", price:60, img:"static/images/south_indian/medu_vada.jpg", category:"South Indian"}
+    ]
+  },
+
+  {
+    name: "Desserts",
+    folder:"desserts",
+    img:"static/images/desserts/cover.jpg",
+    dishes:[
+      {name:"Gulab Jamun", price:40, img:"static/images/desserts/gulab_jamun.jpg", category:"Desserts"},
+      {name:"Rasgulla", price:40, img:"static/images/desserts/rasgulla.jpg", category:"Desserts"},
+      {name:"Gajar Halwa", price:50, img:"static/images/desserts/gajar_halwa.jpg", category:"Desserts"},
+      {name:"Chocolate Brownie", price:80, img:"static/images/desserts/chocolate_brownie.jpg", category:"Desserts"}
+    ]
+  },
+
+  {
+    name: "Rajasthani",
+    folder:"rajasthani",
+    img:"static/images/rajasthani/cover.jpg",
+    dishes:[
+      {name:"Dal Baati Churma", price:100, img:"static/images/rajasthani/dal_bati.jpg", category:"Rajasthani"},
+      {name:"Gatte ki Sabzi", price:80, img:"static/images/rajasthani/gatte_ki_sabji.jpg", category:"Rajasthani"},
+      {name:"Ker Sangri", price:90, img:"static/images/rajasthani/ker_sangri.jpg", category:"Rajasthani"},
+      {name:"Laal Maas", price:150, img:"static/images/rajasthani/laal_maas.jpg", category:"Rajasthani"}
+    ]
+  },
+
+  {
+    name: "Bangali",
+    folder:"bangali",
+    img:"static/images/bangali/cover.jpg",
+    dishes:[
+      {name:"Shorshe Ilish",price:160,img:"static/images/bangali/shorshe_ilish.jpg", category:"Bangali"},
+      {name:"Chingri Malai Curry",price:150,img:"static/images/bangali/chingri_malai_curry.jpg", category:"Bangali"},
+      {name:"Aloo Posto",price:70,img:"static/images/bangali/aloo_gobi.jpg", category:"Bangali"},
+      {name:"Luchi Cholar Dal",price:80,img:"static/images/bangali/Luchi_Cholar_Dal.jpg", category:"Bangali"},
+     
+      
+    ]
+  },
+
+  {
+    name: "Vegetarian",
+    folder:"Vegetarian",
+    img:"static/images/Vegetarian/cover.jpg",
+    dishes:[
+      {name:"Paneer Butter Masala", price:140, img:"static/images/Vegetarian/paneer_butter_masala.jpg", category:"Vegetarian"},
+      {name:"Veg Biryani", price:120, img:"static/images/Vegetarian/veg_biryani.jpg", category:"Vegetarian"},
+      {name:"Palak Paneer", price:130, img:"static/images/Vegetarian/palak_paneer.jpg", category:"Vegetarian"},
+      {name:"Aloo Gobi", price:80, img:"static/images/Vegetarian/aloo_gobi.jpg", category:"Vegetarian"}
+    ]
+  },
+
+  {
+    name: "Non-Veg",
+    folder:"non_veg",
+    img:"static/images/non_veg/cover.jpg",
+    dishes:[
+      {name:"Chicken Curry", price:150, img:"static/images/non_veg/chicken_curry.jpg", category:"Non-Veg"},
+      {name:"Mutton Biryani", price:200, img:"static/images/non_veg/mutton_biryani.jpg", category:"Non-Veg"},
+      {name:"Fish Fry", price:160, img:"static/images/non_veg/fish_fry.jpg", category:"Non-Veg"},
+      {name:"Butter Chicken", price:180, img:"static/images/non_veg/butter_chicken.jpg", category:"Non-Veg"}
+    ]
+  },
+
+  {
+    name: "Gujarati",
+    folder:"gujarati",
+    img:"static/images/gujarati/cover.jpg",
+    dishes:[
+      {name:"Dhokla", price:50, img:"static/images/gujarati/dhokla.jpg", category:"Gujarati"},
+      {name:"Thepla", price:40, img:"static/images/gujarati/thepla.jpg", category:"Gujarati"},
+      {name:"Undhiyu", price:120, img:"static/images/gujarati/undhiyu.jpg", category:"Gujarati"},
+      {name:"Khandvi", price:220, img:"static/images/gujarati/khandvi.jpg", category:"Gujarati"}
+    ]
+  },
+
+  {
+    name: "Punjabi",
+    folder:"punjabi",
+    img:"static/images/punjabi/cover.jpg",
+    dishes:[
+      {name:"Chole Bhature", price:90, img:"static/images/punjabi/chole_bhature.jpg", category:"Punjabi"},
+      {name:"Dal Makhani", price:120, img:"static/images/punjabi/dal_makhani.jpg", category:"Punjabi"},
+      {name:"Paneer Tikka", price:140, img:"static/images/punjabi/paneer_tikka.jpg", category:"Punjabi"},
+      {name:"Amritsari Kulcha", price:200, img:"static/images/punjabi/amritsari_kulcha.jpg", category:"Punjabi"}
+    ]
+  }
+];
+
+
+/* -------------------- state & elements -------------------- */
+let cartData = [];
+let orders = loadOrders();
+
+const menuEl = document.getElementById('menu');
+const popup = document.getElementById('popup');
+const popupContent = document.getElementById('popupContent');
+const cartEl = document.getElementById('cart');
+const cartToggle = document.getElementById('cartToggle');
+const cartItemsEl = document.getElementById('cartItems');
+const totalPriceEl = document.getElementById('totalPrice');
+const cartCount = document.getElementById('cartCount');
+const floatingCart = document.getElementById('floatingCart');
+const placeOrderBtn = document.getElementById('placeOrderBtn');
+const clearCartBtn = document.getElementById('clearCartBtn');
+const orderPopup = document.getElementById('orderPopup');
+const orderList = document.getElementById('orderList');
+const orderTotal = document.getElementById('orderTotal');
+const confirmOrderBtn = document.getElementById('confirmOrderBtn');
+const closeOrderPopup = document.getElementById('closeOrderPopup');
+const editCartBtn = document.getElementById('editCartBtn');
+const searchInput = document.getElementById('search');
+const sortSelect = document.getElementById('sort');
+const stateFilter = document.getElementById('stateFilter');
+const tableNumberInput = document.getElementById('tableNumber');
+const cartTableEl = document.getElementById('cartTable');
+const orderTableEl = document.getElementById('orderTable');
+
+const dashboard = document.getElementById('dashboard');
+const dashboardToggle = document.getElementById('dashboardToggle');
+const closeDashboardBtn = document.getElementById('closeDashboard');
+const dashTotalSales = document.getElementById('dashTotalSales');
+const dashTotalOrders = document.getElementById('dashTotalOrders');
+const dashTopDish = document.getElementById('dashTopDish');
+const dashTopCategory = document.getElementById('dashTopCategory');
+const recentOrdersEl = document.getElementById('recentOrders');
+const categoryChartCanvas = document.getElementById('categoryChart');
+
+/* -------------------- utils -------------------- */
+function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
+function imgError(imgEl){ imgEl.onerror=null; imgEl.src='static/image/no_image.png'; }
+function debounce(fn, wait=220){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args), wait); }; }
+
+/* -------------------- persistence -------------------- */
+function loadOrders(){ try{ const s = localStorage.getItem('sr_orders'); return s? JSON.parse(s): []; }catch(e){ return []; } }
+function saveOrders(){ try{ localStorage.setItem('sr_orders', JSON.stringify(orders)); }catch(e){ console.error(e); } }
+
+/* -------------------- menu render -------------------- */
+function populateStateFilter(){
+  categories.forEach(c => {
+    const opt = document.createElement('option'); opt.value = c.name; opt.textContent = c.name; stateFilter.appendChild(opt);
+  });
+}
+function loadMenu(filterText = '', state='all'){
+  menuEl.innerHTML = '';
+  const q = (filterText||'').toLowerCase().trim();
+  categories.forEach(cat => {
+    const categoryMatch = cat.name.toLowerCase().includes(q);
+    const dishMatch = cat.dishes.some(d => d.name.toLowerCase().includes(q));
+    const stateMatch = (state === 'all') || (cat.name === state);
+    if((!q || categoryMatch || dishMatch) && stateMatch){
+      const card = document.createElement('article'); card.className='menu-card'; card.setAttribute('tabindex','0'); card.dataset.name = cat.name;
+      const cover = cat.img || (`static/images/${cat.folder}/cover.jpg`);
+      card.innerHTML = `<div class="img-wrap"><img data-src="${cover}" alt="${escapeHtml(cat.name)}" loading="lazy" class="lazy"></div>
+      <div class="meta"><div><h3>${escapeHtml(cat.name)}</h3><div class="desc muted">${cat.dishes.length} items</div></div><div style="text-align:right"><div style="font-weight:700;color:#0b1220">Explore →</div></div></div>`;
+      menuEl.appendChild(card);
+    }
+  });
+
+  document.querySelectorAll('img.lazy').forEach(img=>{
+    if(img.dataset.src){ img.src = img.dataset.src; img.onload = ()=> img.classList.remove('skeleton'); img.onerror = ()=> imgError(img); img.classList.add('skeleton'); }
+  });
+
+  document.querySelectorAll('.menu-card').forEach(card=>{
+    card.onclick = ()=>{ openCategory(card.dataset.name); updateStep(2); };
+    card.onkeypress = e=>{ if(e.key==='Enter'){ openCategory(card.dataset.name); updateStep(2); } };
+  });
+}
+
+/* -------------------- category popup -------------------- */
+function openCategory(name){
+  const cat = categories.find(c=>c.name===name); if(!cat) return;
+  popup.style.display = 'flex';
+  renderCategoryPopup(cat, sortSelect.value);
+}
+function renderCategoryPopup(cat, sortMode='default'){
+  let dishes = [...cat.dishes];
+  if(sortMode==='low') dishes.sort((a,b)=>a.price-b.price);
+  else if(sortMode==='high') dishes.sort((a,b)=>b.price-a.price);
+
+  popupContent.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+    <div><h2 style="margin:0">${escapeHtml(cat.name)}</h2><div class="muted" style="font-size:13px">${cat.dishes.length} items</div></div>
+    <div style="display:flex;gap:8px;align-items:center"><button id="closePopupBtn" class="btn ghost">Close</button><button id="viewCartFromPopup" class="btn">View Cart</button></div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:10px 0"><div class="muted">Showing images — click dish to add</div><div class="muted">•</div><div class="muted">Sort: ${sortMode}</div></div>
+  <div class="popup-grid" id="popupGrid"></div>`;
+
+  const popupGrid = popupContent.querySelector('#popupGrid');
+  dishes.forEach(d=>{
+    const item = document.createElement('div'); item.className='dish';
+    item.innerHTML = `<img src="${d.img}" alt="${escapeHtml(d.name)}" loading="lazy" onerror="imgError(this)">
+      <div class="left"><div style="font-weight:700">${escapeHtml(d.name)}</div><div class="muted">₹${d.price}</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end"><button data-name="${escapeHtml(d.name)}" data-price="${d.price}" data-img="${d.img}" data-cat="${escapeHtml(d.category)}">Add</button><div class="muted" style="font-size:12px">${escapeHtml(cat.name)}</div></div>`;
+    popupGrid.appendChild(item);
+  });
+
+  popupContent.querySelector('#closePopupBtn').onclick = ()=>{ popup.style.display='none'; updateStep(1); };
+  popupContent.querySelector('#viewCartFromPopup').onclick = ()=>{ popup.style.display='none'; openCart(); updateStep(3); };
+
+  popupGrid.querySelectorAll('button[data-name]').forEach(btn=>{
+    btn.onclick = ()=> {
+      const name = btn.getAttribute('data-name');
+      const price = Number(btn.getAttribute('data-price'));
+      const img = btn.getAttribute('data-img');
+      const catName = btn.getAttribute('data-cat');
+      addToCart(name, price, img, catName);
+      btn.innerText = 'Added ✓';
+      setTimeout(()=>btn.innerText='Add',700);
+    };
+  });
+}
+
+popup.onclick = e=>{ if(e.target===popup){ popup.style.display='none'; updateStep(1); } };
+
+/* -------------------- cart logic -------------------- */
+function addToCart(name, price, img, category){
+  const existing = cartData.find(i=>i.name===name);
+  if(existing) existing.qty++;
+  else cartData.push({name,price,qty:1,img,category});
+  renderCart(); showCartCount(); animateBadge();
+}
+function renderCart(){
+  cartItemsEl.innerHTML = '';
+  let total = 0;
+  if(cartData.length===0){
+    cartItemsEl.innerHTML = `<div class="muted">Your cart is empty. Add dishes from any category.</div>`;
+  } else {
+    cartData.forEach(item=>{
+      total += item.price * item.qty;
+      const itemEl = document.createElement('div'); itemEl.className='cart-item';
+      itemEl.innerHTML = `<div class="cart-left"><img src="${item.img}" alt="${escapeHtml(item.name)}" style="width:56px;height:46px;object-fit:cover;border-radius:8px" onerror="imgError(this)"><div style="flex:1"><div style="font-weight:700">${escapeHtml(item.name)}</div><div class="muted">₹${item.price}</div></div></div>
+        <div class="qty-control" data-name="${escapeHtml(item.name)}" aria-label="quantity control"><button class="dec" title="Decrease">−</button><div class="qty-num">${item.qty}</div><button class="inc" title="Increase">+</button></div>`;
+      cartItemsEl.appendChild(itemEl);
+      itemEl.querySelector('.dec').onclick = ()=> updateQty(item.name, -1);
+      itemEl.querySelector('.inc').onclick = ()=> updateQty(item.name, +1);
+    });
+  }
+  totalPriceEl.innerText = total;
+  if(cartTableEl) cartTableEl.innerText = tableNumberInput.value ? tableNumberInput.value : '1';
+  updateFloatingBadge();
+}
+function updateQty(name, val){
+  const it = cartData.find(i=>i.name===name); if(!it) return; it.qty += val; if(it.qty<=0) cartData = cartData.filter(i=>i.name!==name); renderCart(); showCartCount();
+}
+function clearCart(){ cartData = []; renderCart(); showCartCount(); }
+function openCart(){ cartEl.classList.add('open'); updateStep(3); }
+cartToggle.onclick = ()=> cartEl.classList.toggle('open');
+floatingCart.onclick = ()=> cartEl.classList.toggle('open');
+function updateFloatingBadge(){ const sum = cartData.reduce((s,i)=>s+i.qty,0); cartCount.innerText = sum; }
+function showCartCount(){ updateFloatingBadge(); }
+function animateBadge(){ const el=cartCount; if(el) el.animate([{transform:'scale(1)'},{transform:'scale(1.25)'},{transform:'scale(1)'}],{duration:350}); }
+
+/* -------------------- place order + payment simulation -------------------- */
+placeOrderBtn.onclick = ()=>{
+  if(cartData.length === 0){ alert('Your cart is empty. Add some dishes first.'); return; }
+  const t = Number(tableNumberInput.value);
+  if(!tableNumberInput.value){ if(!confirm('Table number is empty. ?')) return; }
+  else { if(isNaN(t) || t < 1 || t > 99){ alert('Please enter a table number between 1 and 10'); return; } }
+  orderPopup.style.display = 'flex'; renderOrderPopup(); updateStep(4);
+};
+function renderOrderPopup(){
+  orderList.innerHTML=''; let total=0;
+  cartData.forEach(it=>{
+    total += it.qty * it.price;
+    const el = document.createElement('div'); el.style.display='flex'; el.style.justifyContent='space-between'; el.style.gap='12px'; el.style.alignItems='center';
+    el.innerHTML = `<div style="flex:1">${escapeHtml(it.name)} <span class="muted">x${it.qty}</span></div><div style="font-weight:800">₹${it.price*it.qty}</div>`;
+    orderList.appendChild(el);
+  });
+  orderTotal.innerText = total;
+  if(orderTableEl) orderTableEl.innerText = tableNumberInput.value ? tableNumberInput.value : '1';
+}
+confirmOrderBtn.onclick = ()=>{
+  const tVal = tableNumberInput.value ? tableNumberInput.value : '1';
+  const total = Number(orderTotal.innerText);
+  paymentAmount.innerText = total;
+  orderPopup.style.display = 'none';
+  paymentPopup.style.display = 'flex';
+};
+closeOrderPopup.onclick = ()=>{ orderPopup.style.display='none'; updateStep(1); };
+editCartBtn.onclick = ()=>{ orderPopup.style.display='none'; cartEl.classList.add('open'); updateStep(3); };
+clearCartBtn.onclick = ()=>{ if(!confirm('Clear cart?')) return; clearCart(); };
+
+paymentDoneBtn.onclick = ()=>{
+  // final confirmation before placing order
+  const finalConfirm = confirm('क्या आप निश्चित हैं कि भुगतान हो गया है?\nआर्डर प्लेस होने के बाद इसे रद्द नहीं किया जा सकता।\n\nAre you sure payment is completed?\nOrder cannot be cancelled after placement.');
+  if (!finalConfirm) {
+    alert('Please make sure payment is completed before placing order.');
+    return;
+  }
+
+  // Build payload and POST to server. Server will return `order_id`.
+  const payload = {
+    table_no: tableNumberInput.value || 1,
+    items: cartData,
+    total: Number(paymentAmount.innerText)
+  };
+
+  fetch('/place-order', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(!data || !data.success) return alert('Order failed to place');
+    const serverId = data.order_id;
+
+    const tVal = tableNumberInput.value ? tableNumberInput.value : '1';
+    const order = {
+      id: 'ORD' + Date.now(),
+      server_id: serverId,
+      table: tVal,
+      items: cartData.map(i=>({name:i.name,price:i.price,qty:i.qty,category:i.category})),
+      total: Number(paymentAmount.innerText),
+      ts: Date.now(),
+      paid: true,
+      status: 'PLACED',
+      paymentTs: Date.now()
+    };
+
+    orders.unshift(order);
+    saveOrders();
+    updateDashboard();
+
+    // show tracking widget for this order
+    showTracker(serverId, order.status);
+
+    alert(`✅ Payment Successful!\nOrder placed — ${order.id}\nTable: ${tVal}\nTotal: ₹${order.total}\n\nआपका ऑर्डर तैयार होने तक प्रतीक्षा करें।`);
+    clearCart(); paymentPopup.style.display='none'; cartEl.classList.remove('open'); updateStep(1);
+  })
+  .catch(err => { console.error(err);   alert("✅ Order placed successfully!");
+    clearCart();
+    paymentPopup.style.display = 'none';
+});
+};
+
+closePaymentPopup.onclick = ()=>{
+  paymentPopup.style.display='none';
+  orderPopup.style.display='flex'; // Go back to order confirmation
+};
+
+
+/* -------------------- search / sort / filter -------------------- */
+searchInput.addEventListener('input', debounce((e)=>{ loadMenu(e.target.value, stateFilter.value); }));
+sortSelect.addEventListener('change', ()=>{ if(popup.style.display==='flex'){ const h2 = popupContent.querySelector('h2'); if(!h2) return; const catName = h2.innerText; const cat = categories.find(c=>c.name===catName); if(cat) renderCategoryPopup(cat, sortSelect.value); }});
+stateFilter.addEventListener('change', ()=>{ loadMenu(searchInput.value, stateFilter.value); });
+
+/* -------------------- steps UI -------------------- */
+function updateStep(n){
+  const steps = ['stepBrowse','stepView','stepCart','stepPlace'];
+  steps.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  if(n===1) document.getElementById('stepBrowse')?.classList.add('active');
+  if(n===2) document.getElementById('stepView')?.classList.add('active');
+  if(n===3) document.getElementById('stepCart')?.classList.add('active');
+  if(n===4) document.getElementById('stepPlace')?.classList.add('active');
+}
+
+
+
+function updateDashboard(){
+  const totalSales = orders.reduce((s,o)=>s + (o.paid ? o.total : 0), 0); // only count paid sales
+  const totalOrders = orders.length;
+  const dishCounts = {};
+  const categorySales = {};
+  orders.forEach(o=>{
+    o.items.forEach(it=>{
+      dishCounts[it.name] = (dishCounts[it.name]||0) + it.qty;
+      categorySales[it.category] = (categorySales[it.category]||0) + (it.qty * it.price * (o.paid?1:0)); // sales only if paid
+    });
+  });
+  const topDish = Object.keys(dishCounts).sort((a,b)=>dishCounts[b]-dishCounts[a])[0] || '—';
+  const topCategory = Object.keys(categorySales).sort((a,b)=>categorySales[b]-categorySales[a])[0] || '—';
+  dashTotalSales.innerText = '₹' + totalSales;
+  dashTotalOrders.innerText = totalOrders;
+  dashTopDish.innerText = topDish;
+  dashTopCategory.innerText = topCategory;
+  renderRecentOrders();
+  drawCategoryChart(categorySales);
+}
+
+function renderRecentOrders(){
+  recentOrdersEl.innerHTML = '';
+  if(orders.length===0){ recentOrdersEl.innerHTML = `<div class="muted-dash">No orders yet</div>`; return; }
+  orders.slice(0,10).forEach(o=>{
+    const row = document.createElement('div'); row.className='order-row';
+    const paidLabel = o.paid ? `<div style="font-weight:700;color:#7ef6a6">PAID</div><div class="muted-dash" style="font-size:12px">${new Date(o.paymentTs).toLocaleString()}</div>` : `<div style="font-weight:700;color:#ffd1aa">PENDING</div>`;
+    row.innerHTML = `<div style="flex:1"><div style="font-weight:800">${o.id}</div><div class="muted-dash" style="font-size:12px">Table ${o.table} • ${new Date(o.ts).toLocaleString()}</div></div>
+      <div style="text-align:right"><div class="muted-dash">₹${o.total}</div><div style="margin-top:6px">${paidLabel}<div style="margin-top:6px"><button class="small-badge" onclick="viewOrderDetails('${o.id}')">View</button></div></div></div>`;
+    recentOrdersEl.appendChild(row);
+  });
+}
+
+/* view order details (includes payment time if paid) */
+function viewOrderDetails(orderId){
+  const ord = orders.find(o=>o.id===orderId); if(!ord) return;
+  let text = `Order ${ord.id}\nTable: ${ord.table}\nPlaced: ${new Date(ord.ts).toLocaleString()}\n`;
+  text += `Payment status: ${ord.paid ? 'PAID at ' + new Date(ord.paymentTs).toLocaleString() : 'NOT PAID'}\n\nItems:\n`;
+  ord.items.forEach(it=> text += `${it.name} x${it.qty} — ₹${it.price * it.qty}\n`);
+  text += `\nTotal: ₹${ord.total}\n\n`;
+  if(!ord.paid){
+    if(confirm(text + '\nPay online now for this order? (simulated)')) {
+      ord.paid = true; ord.paymentTs = Date.now(); saveOrders(); updateDashboard(); alert('Payment successful ✅\nPaid at: ' + new Date(ord.paymentTs).toLocaleString());
+    }
+  } else {
+    alert(text);
+  }
+}
+
+/* -------------------- small bar chart -------------------- */
+function drawCategoryChart(categorySales){
+  const labels = categories.map(c=>c.name);
+  const data = labels.map(l => categorySales[l] || 0);
+  const canvas = categoryChartCanvas; const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height; ctx.clearRect(0,0,w,h);
+  const pad = 12; const chartW = w - pad*2; const chartH = h - pad*2; const max = Math.max(1, ...data);
+  const barWidth = chartW / labels.length * 0.6; const gap = (chartW / labels.length) - barWidth;
+  ctx.fillStyle = 'rgba(255,255,255,0.02)'; ctx.fillRect(0,0,w,h);
+  let anim = {t:0}, steps = 30;
+  function frame(){
+    anim.t++; ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '12px Poppins'; ctx.fillText('Sales by Category (₹)', pad, 14);
+    labels.forEach((lab,i)=>{
+      const val = data[i];
+      const x = pad + i*(barWidth + gap) + gap/2;
+      const barH = (val / max) * (chartH - 30) * (anim.t/steps);
+      const y = h - pad - barH;
+      ctx.fillStyle = 'rgba(255,87,51,0.92)'; roundRect(ctx, x, y, barWidth, barH, 6, true, false);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '10px Poppins';
+      const labText = lab.length>10? lab.slice(0,10)+'…':lab;
+      ctx.fillText(labText, x, h - 4);
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = '11px Poppins';
+      if(val>0) ctx.fillText('₹'+val, x, y - 6);
+    });
+    if(anim.t < steps) requestAnimationFrame(frame);
+  }
+  frame();
+}
+function roundRect(ctx, x, y, w, h, r, fill, stroke){
+  if(typeof stroke==='undefined') stroke = true; if(typeof r==='undefined') r = 5;
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+  if(fill) ctx.fill(); if(stroke){ ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.stroke(); }
+}
+function drawChartAnimated(){ updateDashboard(); }
+
+/* -------------------- init -------------------- */
+function dedupeCategories(){ const seen=new Set(); const unique=[]; categories.forEach(c=>{ if(!seen.has(c.name)){ seen.add(c.name); unique.push(c); }}); while(categories.length) categories.pop(); unique.forEach(u=>categories.push(u)); }
+dedupeCategories(); populateStateFilter(); loadMenu(); renderCart(); updateFloatingBadge(); updateDashboard();
+
+/* -------------------- misc handlers -------------------- */
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ popup.style.display='none'; orderPopup.style.display='none'; cartEl.classList.remove('open'); dashboard.classList.remove('open'); updateStep(1); }});
+tableNumberInput.addEventListener('change', ()=>{ let v = Number(tableNumberInput.value); if(isNaN(v)||v<1) tableNumberInput.value=''; else if(v>99) tableNumberInput.value=99; if(cartTableEl) cartTableEl.innerText = tableNumberInput.value ? tableNumberInput.value : '—'; if(orderTableEl) orderTableEl.innerText = tableNumberInput.value ? tableNumberInput.value : '—'; });
+
+
+</script>
+
+<h2 id="category-title"></h2>
+<div id="items-container"></div>
+
+<script>
+const categoryName = "{{ category }}";
+document.getElementById("category-title").innerText = categoryName;
+
+function loadItems() {
+    fetch("/api/menu")
+        .then(res => res.json())
+        .then(data => {
+
+            const container = document.getElementById("items-container");
+            container.innerHTML = "";
+
+            const filtered = data.filter(item =>
+                item.category.toLowerCase() === categoryName.toLowerCase()
+            );
+
+            filtered.forEach(item => {
+                container.innerHTML += `
+                    <div class="card">
+                        <h3>${item.name}</h3>
+                        <p>₹${item.price}</p>
+                        <button>Add to Cart</button>
+                    </div>
+                `;
+            });
+        });
+}
+
+// Page load pe chale
+loadItems();
+
+// Har 5 second me auto update
+setInterval(loadItems, 5000);
+</script>
+<script>
+function openPayment(){
+    document.getElementById("paymentModal").style.display="flex";
+}
+
+function closePayment(){
+    document.getElementById("paymentModal").style.display="none";
+}
+
+function showQR(){
+    document.getElementById("qrSection").style.display="block";
+    document.getElementById("cardSection").style.display="none";
+}
+
+function showCard(){
+    document.getElementById("cardSection").style.display="block";
+    document.getElementById("qrSection").style.display="none";
+}
+</script>
+
+</body>
+</html>

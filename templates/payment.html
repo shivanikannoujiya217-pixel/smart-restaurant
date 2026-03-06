@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Payment</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(-45deg, #667eea, #764ba2, #6dd5ed, #2193b0);
+    background-size: 400% 400%;
+    animation: gradientBG 8s ease infinite;
+}
+
+.container{
+    background:white;
+    padding:50px 60px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 20px 40px rgba(0,0,0,0.2);
+    animation: fadeIn 1s ease-in-out;
+}
+
+h3{
+    margin-bottom:25px;
+    color:#333;
+}
+
+button{
+    padding:14px 35px;
+    font-size:16px;
+    border:none;
+    border-radius:30px;
+    background:#667eea;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.1);
+    background:#5a67d8;
+}
+
+/* Background animation */
+@keyframes gradientBG {
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+/* Card fade animation */
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(30px);}
+    to{opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h3>Order ID: {{ order_id }}</h3>
+
+    <button onclick="window.location.href='/payment-success/{{ order_id }}'">
+        ✅ Payment Successful
+    </button>
+<script>
+function paymentDone(){
+ localStorage.setItem("payment","success");
+ window.location.href="/admin/bill/{{ order_id }}";
+}
+</script>
+
+</body>
+</html>

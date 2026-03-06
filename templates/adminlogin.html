@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+    <style>
+        body {
+            margin:0;
+            font-family:Arial;
+            background: linear-gradient(135deg,#0b0b0b,#1a1a1a);
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+        .login-box{
+            background:#1a1a1a;
+            padding:40px;
+            width:350px;
+            border-radius:20px;
+            box-shadow:0 0 30px #1aff00;
+        }
+        .login-box h2{
+            text-align:center;
+            color:#1aff00;
+        }
+        .login-box input{
+            width:100%;
+            padding:15px;
+            margin:15px 0;
+            background:#333;
+            border:none;
+            border-radius:10px;
+            color:#fff;
+        }
+        .login-box button{
+            width:100%;
+            padding:15px;
+            background:#1aff00;
+            border:none;
+            border-radius:10px;
+            font-size:18px;
+            cursor:pointer;
+        }
+        #msg{ text-align:center; margin-top:15px; }
+    </style>
+</head>
+
+<body>
+<div class="login-box">
+    <h2>🔐 ADMIN LOGIN</h2>
+    <input type="text" id="username" placeholder="Admin Username">
+    <input type="password" id="password" placeholder="Admin Password">
+    <button onclick="login()">LOGIN</button>
+    <div id="msg"></div>
+</div>
+
+<script>
+function login(){
+    fetch('/adminlogin', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            document.getElementById('msg').innerHTML =
+              '<span style="color:#1aff00">Login Success</span>';
+            setTimeout(()=>{
+                window.location.href = data.redirect;
+            },800);
+        } else {
+            document.getElementById('msg').innerHTML =
+              '<span style="color:red">'+data.message+'</span>';
+        }
+    });
+}
+
+document.addEventListener('keydown', e => {
+    if(e.key === 'Enter') login();
+});
+</script>
+</body>
+</html>

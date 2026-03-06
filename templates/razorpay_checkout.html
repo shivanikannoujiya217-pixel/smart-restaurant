@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pay Your Bill</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Razorpay SDK -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #3399cc;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #287fa8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Pay Your Bill</h2>
+  <p><b>Order ID:</b> {{ order_id }}</p>
+  <p><b>Amount:</b> ₹{{ amount }}</p>
+
+  <button id="payBtn">Pay Now</button>
+</div>
+
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+document.getElementById("payBtn").onclick = async function () {
+    console.log("Pay button clicked");
+
+    const res = await fetch("/create-razorpay/6");
+    const data = await res.json(); // ✅ ab JSON aayega
+
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
+
+    var options = {
+        key: "rzp_test_xxxxx",
+        amount: data.amount,
+        currency: "INR",
+        name: "Smart Restaurant",
+        order_id: data.id,
+
+        handler: function (response) {
+            fetch("/verify-payment", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(response)
+            })
+            .then(res => res.text())
+            .then(msg => alert(msg));
+        }
+    };
+
+    var rzp = new Razorpay(options);
+    rzp.open();
+};
+</script>
+
+
+</body>
+</html>

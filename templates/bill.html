@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Bill</title>
+    <style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin:0;
+    padding:20px;
+
+    /* Simple Light Background (No Image) */
+    background: linear-gradient(135deg, #ebafb9, #e67982);
+}
+
+/* Receipt Card */
+.receipt {
+    max-width:380px;
+    margin:auto;
+
+    /* Clean White Card */
+    background:#7a3838;
+
+    padding:22px;
+    border-radius:14px;
+
+    box-shadow:0 12px 30px rgba(0, 0, 0, 0.18);
+
+    animation: floatCard 3s ease-in-out infinite alternate;
+}
+
+/* Floating Animation */
+@keyframes floatCard {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-6px); }
+}
+
+/* Title */
+h2 {
+    text-align:center;
+    margin:10px 0 15px;
+    letter-spacing:2px;
+    color:#22211e;
+}
+
+/* Info */
+.info {
+    font-size:14px;
+    margin-bottom:10px;
+    color:#232524;
+}
+
+/* Table */
+table {
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+th {
+    background:#cabebe;
+    padding:8px 0;
+}
+
+td {
+    padding:7px 0;
+    border-bottom:1px dashed #bd1717;
+    transition:0.3s;
+}
+
+/* Row Hover */
+tr:hover td {
+    background:#d494a2;
+}
+
+/* Total Section */
+.total-box {
+    width:220px;
+    margin-left:auto;
+    font-size:15px;
+}
+
+/* Grand Total Highlight */
+.grand {
+    font-weight:bold;
+    font-size:20px;
+    color:#28a745;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform:scale(1); }
+    50% { transform:scale(1.04); }
+    100% { transform:scale(1); }
+}
+
+/* Footer */
+.footer {
+    text-align:center;
+    margin-top:18px;
+    font-size:13px;
+    color:#666;
+}
+
+/* Buttons */
+a {
+    display:inline-block;
+    padding:8px 14px;
+    margin-top:10px;
+    background:linear-gradient(135deg,#007bff,#00b4db);
+    color:white;
+    text-decoration:none;
+    border-radius:6px;
+    transition:0.3s;
+    box-shadow:0 5px 15px rgba(0,0,0,.2);
+}
+
+a:hover {
+    transform:translateY(-2px);
+    box-shadow:0 8px 22px rgba(0,0,0,.25);
+}
+
+/* Print Mode */
+@media print {
+    body { background:white; }
+    .receipt {
+        box-shadow:none;
+        animation:none;
+    }
+}
+</style>
+</head>
+
+<body>
+<div style="position:relative; height:90px;">
+
+    <!-- Logo Top Left -->
+    <img src="{{ url_for('static', filename='SR.jpg') }}"
+         style="width:90px; position:absolute; top:0; left:0;">
+
+</div>
+    <!-- Title Center -->
+    <h2 style="text-align:center; margin-top:0px;">
+               SMART RESTAURANT
+</h2>
+
+    </div>
+
+</div>
+        <b>Date:{{ date }} <br>
+        <b>Time: {{ time }}
+<div class="info">
+        
+        Order ID: {{ table_no }}<br>
+        Table: {{ order_id }}<br>
+       
+</div>
+
+    <table>
+<tr>
+<th style="text-align:left;">Item</th>
+<th style="text-align:center;">Qty</th>
+<th style="text-align:center;">Amount(₹)</th>
+<th style="text-align:center;">Total Amount</th>
+</tr>
+
+{% for item in items %}
+<tr>
+<td>{{item.name}}</td>
+<td style="text-align:center;">{{item.qty}}</td>
+<td style="text-align:center;">{{item.price}}</td>
+<td style="text-align:center;">{{item.qty * item.price}}</td>
+</tr>
+{% endfor %}
+</table>
+<hr>
+
+<div style="width:200px; margin-left:auto; font-size:16px;">
+
+    <p><strong>Subtotal:</strong> ₹{{ total }}</p>
+
+    <p><strong>GST (5%):</strong> ₹{{ gst }}</p>
+
+    <p><strong>Discount:</strong> ₹{{ discount }}</p>
+
+    <p><strong>Grand Total</strong> ₹{{ subtotal }}</p>
+
+</div>
+</div>
+
+
+
+    <div class="footer">
+        Thank you for visiting ❤️ <br>
+        Visit Again!
+    </div>
+
+
+<a href="/bill/{{ order_id }}/pdf">⬇ Download PDF</a>
+{% for o in orders %}
+<a href="/admin/bill/{{ o[0] }}">View Bill #{{ o[0] }}</a><br>
+{% endfor %}
+
+
+</body>
+</html>
