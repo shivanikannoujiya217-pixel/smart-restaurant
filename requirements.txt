@@ -3,4 +3,5 @@ Flask-cors
 Flask-SQLAlchemy
 gunicorn
 Pillow
+reportlab
 
