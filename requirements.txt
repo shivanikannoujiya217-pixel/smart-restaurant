@@ -1,4 +1,6 @@
 Flask
 Flask-cors
+Flask-SQLAlchemy
 gunicorn
-pillow
+Pillow
+
