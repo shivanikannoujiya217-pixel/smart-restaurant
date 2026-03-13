@@ -718,13 +718,11 @@ def api_delete_menu(item_id):
 
 # ======================= INIT =======================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with app.app_context():
-        # create tables first, then ensure any schema columns we rely on
         db.create_all()
         ensure_db_columns()
-    # run with Socket.IO
-    socketio.run(app, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000)
 
 
     
