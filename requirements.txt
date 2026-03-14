@@ -13,4 +13,5 @@ reportlab
 PyMySQL
 qrcode
 python-dotenv
+razorpay
 setuptools
