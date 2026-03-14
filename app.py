@@ -17,14 +17,18 @@ app.secret_key = "secret"
 # Socket.IO for real-time updates
 socketio = SocketIO(app, cors_allowed_origins='*')
 
+import razorpay
+from flask_sqlalchemy import SQLAlchemy
+
 # Razorpay
 razorpay_client = razorpay.Client(
-    auth=("rzp_test_XXXXXXX", "YOUR_SECRET_KEY")
+    auth=("rzp_test_XXXXXXXX", "rzp_test_secret")
 )
 
 # Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///restaurant.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
 def ensure_db_columns():
