@@ -10,7 +10,6 @@ gunicorn==20.1.0
 eventlet
 pillow
 reportlab
-requestlab
 PyMySQL
 qrcode
 python-dotenv
