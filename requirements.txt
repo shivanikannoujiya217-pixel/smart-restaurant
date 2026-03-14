@@ -14,4 +14,3 @@ PyMySQL
 qrcode
 python-dotenv
 setuptools
-
