@@ -182,8 +182,7 @@ function renderOrders(){
           <small>Table ${o.table} • ${new Date(o.ts).toLocaleString()}</small>
         </div>
         <div>
-          <span class="badge ${o.paid ? 'paid':'pending'}">
-            ${o.paid ? 'PAID':'PENDING'}
+        
           </span>
         </div>
       </div>
@@ -196,8 +195,8 @@ function renderOrders(){
 
       <b>Total: ₹${o.total}</b><br><br>
 
-      ${!o.paid ? `<button class="small" onclick="markPaid('${o.id}')">Mark as Paid</button>` : ''}
-    `;
+     
+    
 
     list.appendChild(div);
   });
