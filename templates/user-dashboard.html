@@ -550,9 +550,13 @@ paymentDoneBtn.onclick = ()=>{
     total: Number(paymentAmount.innerText)
   };
 
-  fetch('https://smart-restaurant-1-3alo.onrender.com//place-order', {
-    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
-  })
+  fetch('https://smart-restaurant-1-3alo.onrender.com/place-order', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(payload)
+})
   .then(r => r.json())
   .then(data => {
     if(!data || !data.success) return alert('Order failed to place');
