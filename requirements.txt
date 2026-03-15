@@ -14,5 +14,4 @@ PyMySQL
 qrcode
 python-dotenv
 razorpay
-setuptools
-wheel
+
