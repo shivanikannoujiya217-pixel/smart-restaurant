@@ -17,8 +17,7 @@ app.secret_key = "secret"
 # Socket.IO for real-time updates
 socketio = SocketIO(app, cors_allowed_origins='*')
 
-import razorpay
-from flask_sqlalchemy import SQLAlchemy
+
 
 # Razorpay
 razorpay_client = razorpay.Client(
@@ -545,7 +544,7 @@ def download_bill(order_id):
         pdf.drawString(360, y, str(qty))
         pdf.drawString(410, y, str(price))
         pdf.drawString(480, y, str(item_total))
-        y=-25
+        y -= 25
 
     pdf.drawString(60, y, "-" * 70)
 
