@@ -661,7 +661,8 @@ def menu_manager_page():
         return redirect('/admin/login')
     items = Menu.query.all()
     return render_template('menu_manager.html', items=items)
-      @app.route('/api/orders')
+    
+@app.route('/api/orders')
 def get_orders():
     con = sqlite3.connect("restaurant.db")
     cur = con.cursor()
