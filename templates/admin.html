@@ -182,12 +182,9 @@ function renderOrders(){
           <small>Table ${o.table} • ${new Date(o.ts).toLocaleString()}</small>
         </div>
         <div>
-         
-       <span class="badge paid">
-               PAID
-
-
-          </span>
+           <span class="badge ${o.paid ? 'paid':'pending'}">
+${o.paid ? 'PAID':'PENDING'}
+</span>
         </div>
       </div>
 
@@ -198,10 +195,6 @@ function renderOrders(){
       </ul>
 
       <b>Total: ₹${o.total}</b><br><br>
-
-     
-    
-
     list.appendChild(div);
   });
 }
