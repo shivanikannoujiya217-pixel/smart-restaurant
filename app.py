@@ -678,7 +678,7 @@ def get_orders():
             "items": json.loads(r[2]),
             "total": r[3],
             "status": r[4]
-            "ts": datetime.now().timestamp()
+            
         })
 
     con.close()
