@@ -222,6 +222,23 @@ function clearAll(){
 
 loadOrders();
 renderDashboard();
+
+function loadOrdersFromServer(){
+
+fetch("https://smart-restaurant-1-3alo.onrender.com/api/orders")
+.then(res => res.json())
+.then(data => {
+
+orders = data
+renderDashboard()
+
+})
+
+}
+
+loadOrdersFromServer()
+
+setInterval(loadOrdersFromServer,3000)
 </script>
 
 </body>
