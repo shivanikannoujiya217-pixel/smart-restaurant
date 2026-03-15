@@ -7,7 +7,8 @@ from reportlab.pdfgen import canvas
 from flask_socketio import SocketIO
 import razorpay
 import urllib.parse
-
+from flask_cors import CORS
+CORS(app)
 
 
 
