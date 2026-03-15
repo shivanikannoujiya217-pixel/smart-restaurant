@@ -8,11 +8,12 @@ from flask_socketio import SocketIO
 import razorpay
 import urllib.parse
 from flask_cors import CORS
-CORS(app)
+
 
 
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = "secret"
 
 # Socket.IO for real-time updates
