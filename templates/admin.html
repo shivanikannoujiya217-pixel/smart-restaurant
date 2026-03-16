@@ -194,16 +194,32 @@ const list = document.getElementById("ordersList")
 list.innerHTML=""
 
 orders.forEach(o=>{
+const itemsHTML = o.items.map(i=>
+`<li>${i.name} x${i.qty} – ₹${i.price*i.qty}</li>`
+).join("")
+  
 
 const div=document.createElement("div")
 
 div.className="order"
-
 div.innerHTML=`
+<div class="order-header">
+<div>
 <b>Order #${o.id}</b><br>
-Table ${o.table_no}<br>
-Total ₹${o.total}<br>
-Status ${o.status}
+<small>Table ${o.table_no}</small>
+</div>
+
+<div>
+<span class="badge $
+  {o.status=="PAID"?"paid":"pending"}">
+${o.status}
+</span>
+</div>
+</div>
+
+<ul>${itemsHTML}</ul>
+
+<b>Total ₹${o.total}</b>
 `
 
 list.appendChild(div)
@@ -211,6 +227,7 @@ list.appendChild(div)
 })
 
 }
+
 
 
 function clearAll(){
