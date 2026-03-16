@@ -164,7 +164,7 @@ def clear_orders():
     return {"status":"cleared"}
 
 
- @app.route('/api/orders')
+@app.route('/api/orders')
 def api_orders():
 
     conn = sqlite3.connect("restaurant.db")
