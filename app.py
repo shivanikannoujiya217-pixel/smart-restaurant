@@ -805,25 +805,17 @@ def menu_manager_page():
     
 @app.route('/api/orders')
 def get_orders():
-    con = sqlite3.connect("restaurant.db")
-    cur = con.cursor()
 
-    cur.execute("SELECT id, table_no, items, total, status FROM orders ORDER BY id DESC")
-    rows = cur.fetchall()
+    conn = sqlite3.connect("restaurant.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
 
-    orders = []
-    for r in rows:
-        orders.append({
-            "id": r[0],
-            "table": r[1],
-            "items": json.loads(r[2]),
-            "total": r[3],
-            "status": r[4]
-            
-        })
+    cur.execute("SELECT * FROM orders ORDER BY id DESC")
+    orders = cur.fetchall()
 
-    con.close()
-    return jsonify(orders)
+    conn.close()
+
+    return jsonify([dict(row) for row in orders])
 
 
 
