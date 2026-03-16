@@ -1,205 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Restaurant Bill</title>
+    <meta charset="utf-8">
+    <title>Receipt - Smart Restaurant</title>
     <style>
-body {
-    font-family: 'Segoe UI', sans-serif;
-    margin:0;
-    padding:20px;
-
-    /* Simple Light Background (No Image) */
-    background: linear-gradient(135deg, #ebafb9, #e67982);
-}
-
-/* Receipt Card */
-.receipt {
-    max-width:380px;
-    margin:auto;
-
-    /* Clean White Card */
-    background:#7a3838;
-
-    padding:22px;
-    border-radius:14px;
-
-    box-shadow:0 12px 30px rgba(0, 0, 0, 0.18);
-
-    animation: floatCard 3s ease-in-out infinite alternate;
-}
-
-/* Floating Animation */
-@keyframes floatCard {
-    from { transform: translateY(0px); }
-    to { transform: translateY(-6px); }
-}
-
-/* Title */
-h2 {
-    text-align:center;
-    margin:10px 0 15px;
-    letter-spacing:2px;
-    color:#22211e;
-}
-
-/* Info */
-.info {
-    font-size:14px;
-    margin-bottom:10px;
-    color:#232524;
-}
-
-/* Table */
-table {
-    width:100%;
-    border-collapse:collapse;
-    font-size:14px;
-}
-
-th {
-    background:#cabebe;
-    padding:8px 0;
-}
-
-td {
-    padding:7px 0;
-    border-bottom:1px dashed #bd1717;
-    transition:0.3s;
-}
-
-/* Row Hover */
-tr:hover td {
-    background:#d494a2;
-}
-
-/* Total Section */
-.total-box {
-    width:220px;
-    margin-left:auto;
-    font-size:15px;
-}
-
-/* Grand Total Highlight */
-.grand {
-    font-weight:bold;
-    font-size:20px;
-    color:#28a745;
-    animation:pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { transform:scale(1); }
-    50% { transform:scale(1.04); }
-    100% { transform:scale(1); }
-}
-
-/* Footer */
-.footer {
-    text-align:center;
-    margin-top:18px;
-    font-size:13px;
-    color:#666;
-}
-
-/* Buttons */
-a {
-    display:inline-block;
-    padding:8px 14px;
-    margin-top:10px;
-    background:linear-gradient(135deg,#007bff,#00b4db);
-    color:white;
-    text-decoration:none;
-    border-radius:6px;
-    transition:0.3s;
-    box-shadow:0 5px 15px rgba(0,0,0,.2);
-}
-
-a:hover {
-    transform:translateY(-2px);
-    box-shadow:0 8px 22px rgba(0,0,0,.25);
-}
-
-/* Print Mode */
-@media print {
-    body { background:white; }
-    .receipt {
-        box-shadow:none;
-        animation:none;
-    }
-}
-</style>
+        body { font-family: Courier, monospace; font-size:14px; padding:20px; }
+        .receipt { max-width:520px; margin:0 auto; color:#000; background:#fff; padding:12px; }
+        .center { text-align:center; }
+        .right { text-align:right; }
+        .dashed { border-top:1px dashed #000; margin:10px 0; }
+        table { width:100%; border-collapse:collapse; }
+        td { padding:6px 0; }
+        .item-name { width:60%; }
+        .qty { width:10%; text-align:center; }
+        .rate { width:15%; text-align:center; }
+        .line-total { width:15%; text-align:right; }
+        .totals { width:260px; margin-left:auto; }
+        .grand { font-weight:bold; font-size:18px; }
+        @media print { a { display:none; } }
+    </style>
 </head>
-
 <body>
-<div style="position:relative; height:90px;">
-
-    <!-- Logo Top Left -->
-    <img src="{{ url_for('static', filename='SR.jpg') }}"
-         style="width:90px; position:absolute; top:0; left:0;">
-
-</div>
-    <!-- Title Center -->
-    <h2 style="text-align:center; margin-top:0px;">
-               SMART RESTAURANT
-</h2>
-
+<div class="receipt">
+    <div class="center">
+        <div style="font-weight:bold; font-size:16px;">SMART RESTAURANT</div>
+        <div style="margin-top:6px;">Date: {{ date }}   Time: {{ time }}</div>
+        <div style="margin-top:6px;">Order ID: {{ order_id }}   Table: {{ table_no }}</div>
+        {% if customer_name %}
+        <div style="margin-top:4px;">Customer: {{ customer_name }}</div>
+        {% endif %}
+        {% if waiter %}
+        <div style="margin-top:4px;">Waiter: {{ waiter }}</div>
+        {% endif %}
+        {% if order_status %}
+        <div style="margin-top:4px;">Status: {{ order_status }}</div>
+        {% endif %}
+        {% if payment_status or payment_method or payment_id %}
+        <div style="margin-top:6px;">
+            {% if payment_status %}<strong>Payment:</strong> {{ payment_status }}{% endif %}
+            {% if payment_method %} &nbsp; <strong>Method:</strong> {{ payment_method }}{% endif %}
+            {% if payment_id %}<br><strong>Payment ID:</strong> {{ payment_id }}{% endif %}
+        </div>
+        {% endif %}
     </div>
 
-</div>
-        <b>Date:{{ date }} <br>
-        <b>Time: {{ time }}
-<div class="info">
-        
-        Order ID: {{ table_no }}<br>
-        Table: {{ order_id }}<br>
-       
-</div>
+    <div class="dashed"></div>
 
     <table>
-<tr>
-<th style="text-align:left;">Item</th>
-<th style="text-align:center;">Qty</th>
-<th style="text-align:center;">Amount(₹)</th>
-<th style="text-align:center;">Total Amount</th>
-</tr>
+        <tr>
+            <td class="item-name"><strong>Item</strong></td>
+            <td class="qty"><strong>Qty</strong></td>
+            <td class="rate"><strong>Rate</strong></td>
+            <td class="line-total"><strong>Total</strong></td>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td class="item-name">{{ item.name }}
+                {% if item.modifiers %}
+                    <div style="font-size:12px;color:#555;">{% if item.modifiers is string %}{{ item.modifiers }}{% else %}{% for m in item.modifiers %}{{ m }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}</div>
+                {% endif %}
+            </td>
+            <td class="qty">{{ item.qty }}</td>
+            <td class="rate">{{ '%.2f'|format(item.price) }}</td>
+            <td class="line-total">{{ '%.2f'|format(item.qty * item.price) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 
-{% for item in items %}
-<tr>
-<td>{{item.name}}</td>
-<td style="text-align:center;">{{item.qty}}</td>
-<td style="text-align:center;">{{item.price}}</td>
-<td style="text-align:center;">{{item.qty * item.price}}</td>
-</tr>
-{% endfor %}
-</table>
-<hr>
+    <div class="dashed"></div>
 
-<div style="width:200px; margin-left:auto; font-size:16px;">
-
-    <p><strong>Subtotal:</strong> ₹{{ total }}</p>
-
-    <p><strong>GST (5%):</strong> ₹{{ gst }}</p>
-
-    <p><strong>Discount:</strong> ₹{{ discount }}</p>
-
-    <p><strong>Grand Total</strong> ₹{{ subtotal }}</p>
-
-</div>
-</div>
-
-
-
-    <div class="footer">
-        Thank you for visiting ❤️ <br>
-        Visit Again!
+    <div class="totals">
+        <table>
+            <tr><td>Subtotal:</td><td class="right">Rs {{ '%.2f'|format(subtotal) }}</td></tr>
+            {% if gst is defined %}<tr><td>GST:</td><td class="right">Rs {{ '%.2f'|format(gst) }}</td></tr>{% endif %}
+            {% if service is defined %}<tr><td>Service:</td><td class="right">Rs {{ '%.2f'|format(service) }}</td></tr>{% endif %}
+            {% if discount is defined %}<tr><td>Discount:</td><td class="right">Rs {{ '%.2f'|format(discount) }}</td></tr>{% endif %}
+            <tr class="grand"><td>Grand Total:</td><td class="right">Rs {{ '%.2f'|format(total) }}</td></tr>
+            {% if payment_status %}<tr><td>Paid:</td><td class="right">{{ payment_status }}</td></tr>{% endif %}
+        </table>
     </div>
 
+    <div style="height:24px;"></div>
+    <div class="center">Thank you for visiting. Visit Again!</div>
 
-<a href="/bill/{{ order_id }}/pdf">⬇ Download PDF</a>
-{% for o in orders %}
-<a href="/admin/bill/{{ o[0] }}">View Bill #{{ o[0] }}</a><br>
-{% endfor %}
+    <div style="margin-top:12px;">
+        <a href="{{ url_for('bill_pdf', order_id=order_id) }}">Download PDF</a>
+    </div>
 
+    {% if orders %}
+    <div style="margin-top:8px;">
+        {% for o in orders %}
+            <a href="{{ url_for('show_bill', order_id=o[0]) }}">View Bill #{{ o[0] }}</a><br>
+        {% endfor %}
+    </div>
+    {% endif %}
 
+</div>
 </body>
 </html>
