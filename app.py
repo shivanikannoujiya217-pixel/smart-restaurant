@@ -189,38 +189,64 @@ def show_bill(order_id):
 
     order_id, table_no, items_json, created_at = row
 
-    items = json.loads(items_json)
+    # parse items (stored as list of dicts)
+    try:
+        items = json.loads(items_json) if items_json else []
+    except Exception:
+        items = []
 
-    real_subtotal = sum(item["price"] * item["qty"] for item in items)
-    gst = round(real_subtotal * 0.05, 2)
+    # compute totals from items reliably
+    subtotal_val = 0.0
+    for it in items:
+        try:
+            price = float(it.get('price', 0)) if isinstance(it, dict) else 0
+            qty = int(it.get('qty', 0)) if isinstance(it, dict) else 0
+        except Exception:
+            price = 0
+            qty = 0
+        subtotal_val += price * qty
+
+    gst = round(subtotal_val * 0.05, 2)
     discount = 20
-    real_grand_total = round(real_subtotal + gst - discount, 2)
+    total_val = round(subtotal_val + gst - discount, 2)
 
-# 🔁 Swap Values   
-    subtotal = real_grand_total
-    grand_total = real_subtotal
-
-
-    # ✅ SAFE DATE FIX
-    if created_at:
-        dt = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S")
-    else:
+    # parse created_at safely (some rows may be NULL)
+    try:
+        if created_at:
+            # try common formats
+            try:
+                dt = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                dt = datetime.fromisoformat(created_at)
+        else:
+            dt = datetime.now()
+    except Exception:
         dt = datetime.now()
 
     date = dt.strftime("%d %b %Y")
     time = dt.strftime("%I:%M %p")
+
+    # include a small recent orders list for quick navigation in template
+    conn2 = sqlite3.connect("restaurant.db")
+    cur2 = conn2.cursor()
+    try:
+        cur2.execute("SELECT id FROM orders ORDER BY id DESC LIMIT 5")
+        recent_orders = cur2.fetchall()
+    finally:
+        conn2.close()
 
     return render_template(
         "bill.html",
         order_id=order_id,
         table_no=table_no,
         items=items,
-        subtotal=subtotal,
+        subtotal=round(subtotal_val,2),
         gst=gst,
         discount=discount,
-        total=grand_total,
+        total=total_val,
         date=date,
-        time=time
+        time=time,
+        orders=recent_orders
     )
 
 from reportlab.pdfgen import canvas
@@ -233,72 +259,142 @@ from io import BytesIO
 from flask import send_file
 import json, sqlite3
 
-@app.route('/bill/<int:order_id>/pdf')
+  @app.route('/bill/<int:order_id>/pdf')
 def bill_pdf(order_id):
     con = sqlite3.connect("restaurant.db")
     cur = con.cursor()
     cur.execute(
-        "SELECT table_no, items, total, status FROM orders WHERE id=?",
+        "SELECT id, table_no, items, total, status, created_at FROM orders WHERE id=?",
         (order_id,)
     )
     row = cur.fetchone()
-    con.close()
 
     if not row:
+        con.close()
         return "Order not found", 404
-    items = json.loads(row[1])
 
-    table_no, items_json, total, status = row
-    items = json.loads(items_json)
+    # unpack row
+    _, table_no, items_json, total_db, status, created_at = row
 
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    styles = getSampleStyleSheet()
-    story = []
+    try:
+        items = json.loads(items_json) if items_json else []
+    except Exception:
+        items = []
 
-    story.append(Paragraph("<b>RESTAURANT BILL</b><br/><br/>", styles["Title"]))
-    story.append(Paragraph(f"Order ID: {order_id}", styles["Normal"]))
-    story.append(Paragraph(f"Table No: {table_no}<br/><br/>", styles["Normal"]))
+    # compute display context (same as /bill route) so HTML looks identical
+    subtotal_val = 0.0
+    for it in items:
+        try:
+            price = float(it.get('price', 0)) if isinstance(it, dict) else 0
+            qty = int(it.get('qty', 0)) if isinstance(it, dict) else 0
+        except Exception:
+            price = 0
+            qty = 0
+        subtotal_val += price * qty
 
-    for i in items:
-        line = f"{i['name']} x{i['qty']} = ₹{i['qty'] * i['price']}"
-        story.append(Paragraph(line, styles["Normal"]))
+    gst = round(subtotal_val * 0.05, 2)
+    discount = 20
+    total_val = round(subtotal_val + gst - discount, 2)
 
-    story.append(Paragraph(f"<br/><b>Total: ₹{total}</b>", styles["Normal"]))
-    story.append(Paragraph(f"Status: {status}", styles["Normal"]))
+    try:
+        if created_at:
+            try:
+                dt = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                dt = datetime.fromisoformat(created_at)
+        else:
+            dt = datetime.now()
+    except Exception:
+        dt = datetime.now()
 
-    doc.build(story)
-    buffer.seek(0)
+    date = dt.strftime("%d %b %Y")
+    time = dt.strftime("%I:%M %p")
 
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=f"bill_{order_id}.pdf",
-        mimetype="application/pdf"
+    # render HTML from template with same variables
+    html = render_template(
+        "bill.html",
+        order_id=order_id,
+        table_no=table_no,
+        items=items,
+        subtotal=round(subtotal_val,2),
+        gst=gst,
+        discount=discount,
+        total=total_val,
+        date=date,
+        time=time,
+        orders=[(order_id,)]
     )
 
-def create_order(table_no, items, total):
-    
+    # try pdfkit (wkhtmltopdf) to preserve HTML/CSS/images
+    try:
+        options = {
+            'enable-local-file-access': None,
+            'quiet': ''
+        }
+        pdf_bytes = pdfkit.from_string(html, False, options=options, css=None, configuration=None, toc=None)
+        buffer = BytesIO(pdf_bytes)
+        buffer.seek(0)
+        con.close()
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f"bill_{order_id}.pdf",
+            mimetype="application/pdf"
+        )
+    except Exception:
+        # fallback to ReportLab if pdfkit/wkhtmltopdf not available
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        styles = getSampleStyleSheet()
+        story = []
+        story.append(Paragraph("<b>RESTAURANT BILL</b><br/><br/>", styles["Title"]))
+        story.append(Paragraph(f"Order ID: {order_id}", styles["Normal"]))
+        story.append(Paragraph(f"Table No: {table_no}<br/><br/>", styles["Normal"]))
+        for i in items:
+            if isinstance(i, dict):
+                name = i.get('name', 'Item')
+                qty = int(i.get('qty', 0))
+                price = float(i.get('price', 0))
+            else:
+                name = str(i)
+                qty = 0
+                price = 0
+            line = f"{name} x{qty} = Rs {qty * price:.2f}"
+            story.append(Paragraph(line, styles["Normal"]))
+        story.append(Paragraph(f"<br/><b>Total: Rs {total_val:.2f}</b>", styles["Normal"]))
+        story.append(Paragraph(f"Status: {status}", styles["Normal"]))
+        doc.build(story)
+        buffer.seek(0)
+        con.close()
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f"bill_{order_id}.pdf",
+            mimetype="application/pdf"
+        )
+
+ef create_order(table_no, items, total):
     con = sqlite3.connect("restaurant.db")
     cur = con.cursor()
 
-    cur.execute(
-        "INSERT INTO orders (table_no, total, status) VALUES (?, ?, ?)",
-        (table_no, total, "PAID")
-        
-    )
+    items_json = json.dumps([{'name': n, 'qty': q, 'price': 0} for n, q in items])
+
+    try:
+        cur.execute(
+            "INSERT INTO orders (table_no, items, total, status, created_at) VALUES (?, ?, ?, ?, ?)",
+            (table_no, items_json, total, "PAID", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        )
+    except Exception:
+        cur.execute(
+            "INSERT INTO orders (table_no, items, total, status) VALUES (?, ?, ?, ?)",
+            (table_no, items_json, total, "PAID")
+        )
 
     order_id = cur.lastrowid
-
-    for name, qty in items:
-        cur.execute("""
-INSERT INTO orders (table_no, items, total, status)
-VALUES (?, ?, ?, ?)
-""", )
-    
     con.commit()
     con.close()
     return order_id
+
 
 @app.route('/admin/order-status', methods=['POST'])
 def order_status():
@@ -419,37 +515,61 @@ def admin_generate_payment(order_id):
     # reuse the same logic as generate_payment
     return generate_payment(order_id)
 
-
+  
 @app.route('/admin/bill/<int:table_no>')
 def generate_bill(table_no):
-
-    items = '{}'
-    total = ''
-    status = ""
-
+    # find the most recent order for this table
     conn = sqlite3.connect("restaurant.db")
     cur = conn.cursor()
-
-    cur.execute("""
-        INSERT INTO FROM order_table  
-                (table_no, items, total, status)
-        VALUES (?, ?, ?, ?)
-    """, (table_no, items, total, status))
+    cur.execute("SELECT id, table_no, items, total, status, created_at FROM orders WHERE table_no=? ORDER BY id DESC LIMIT 1", (table_no,))
     row = cur.fetchone()
-    
+    conn.close()
+
     if not row:
         return "Order not found", 404
 
-    items = json.loads(row[1])
+    order_id, table_no, items_json, total, status, created_at = row
+    try:
+        items = json.loads(items_json) if items_json else []
+    except Exception:
+        items = []
 
-    conn.commit()
-    conn.close()
-    return render_template(
-        "bill.html",
-        table_no=table_no,
-        items=items,
-        total=total
-    )
+    # reuse show_bill rendering by redirecting to that route's template with same data
+    # compute totals similar to show_bill
+    subtotal_val = 0.0
+    for it in items:
+        if isinstance(it, dict):
+            price = float(it.get('price', 0))
+            qty = int(it.get('qty', 0))
+        else:
+            price = 0
+            qty = 0
+        subtotal_val += price * qty
+    gst = round(subtotal_val * 0.05, 2)
+    discount = 20
+    total_val = round(subtotal_val + gst - discount, 2)
+
+    # format created_at
+    try:
+        dt = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S") if created_at else datetime.now()
+    except Exception:
+        dt = datetime.now()
+
+    date = dt.strftime("%d %b %Y")
+    time = dt.strftime("%I:%M %p")
+
+    return render_template("bill.html",
+                           order_id=order_id,
+                           table_no=table_no,
+                           items=items,
+                           subtotal=round(subtotal_val,2),
+                           gst=gst,
+                           discount=discount,
+                           total=total_val,
+                           date=date,
+                           time=time,
+                           orders=[(order_id,)])
+
 
 
 
@@ -472,22 +592,25 @@ from datetime import datetime
 
 @app.route('/admin/download-bill/<int:order_id>')
 def download_bill(order_id):
-
     conn = sqlite3.connect("restaurant.db")
     cur = conn.cursor()
 
     cur.execute(
-        "SELECT table_no, items, total, status FROM order_table WHERE id = ?",
+        "SELECT table_no, items, total, status FROM orders WHERE id = ?",
         (order_id,)
     )
     row = cur.fetchone()
-    conn.close()
 
     if not row:
+        conn.close()
         return "Order not found"
 
-    table_no, items, total, status = row
-    items = json.loads(items)
+    table_no, items_raw, total_db, status = row
+
+    try:
+        parsed = json.loads(items_raw) if items_raw else []
+    except Exception:
+        parsed = []
 
     buffer = io.BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
@@ -519,7 +642,7 @@ def download_bill(order_id):
     y -= 25
     pdf.drawString(60, y, "Item")
     pdf.drawString(350, y, "Qty")
-    pdf.drawString(400, y, "₹")
+    pdf.drawString(400, y, "Rate")
     pdf.drawString(470, y, "Total")
 
     y -= 15
@@ -528,24 +651,37 @@ def download_bill(order_id):
     # ===== ITEMS =====
     y -= 25
     subtotal = 0
-    for name, qty in items.items():
 
-        # price fetch from menu table
-        cur.execute("SELECT price FROM menu WHERE name = ?", (name,))
-        price_row = cur.fetchone()
+    # parsed may be a list of dicts or a dict name->qty
+    if isinstance(parsed, dict):
+        items_iter = parsed.items()
+    else:
+        # convert list of dicts into (name, qty) pairs
+        items_iter = []
+        for it in parsed:
+            if isinstance(it, dict):
+                items_iter.append((it.get('name', 'Item'), int(it.get('qty', 0))))
+            else:
+                items_iter.append((str(it), 0))
 
-        if price_row:
-            price = price_row[0]
-        else:
+    for name, qty in items_iter:
+        # price fetch from menu table only if not provided in parsed data
+        price = None
+        try:
+            # try to find price in menu
+            cur.execute("SELECT price FROM menu WHERE name = ?", (name,))
+            price_row = cur.fetchone()
+            price = price_row[0] if price_row else 0
+        except Exception:
             price = 0
 
         item_total = price * qty
         subtotal += item_total
 
-        pdf.drawString(60, y, name)
+        pdf.drawString(60, y, str(name))
         pdf.drawString(360, y, str(qty))
-        pdf.drawString(410, y, str(price))
-        pdf.drawString(480, y, str(item_total))
+        pdf.drawString(410, y, f"{price:.2f}")
+        pdf.drawString(480, y, f"{item_total:.2f}")
         y -= 25
 
     pdf.drawString(60, y, "-" * 70)
@@ -557,15 +693,17 @@ def download_bill(order_id):
 
     y -= 40
 
-    pdf.drawRightString(width - 60, y, f"Subtotal: ₹{subtotal}")
+    pdf.drawRightString(width - 60, y, f"Subtotal: Rs {round(subtotal,2):.2f}")
     y -= 20
-    pdf.drawRightString(width - 60, y, f"GST (5%): ₹{round(gst,2)}")
+    pdf.drawRightString(width - 60, y, f"GST (5%): Rs {round(gst,2):.2f}")
     y -= 20
-    pdf.drawRightString(width - 60, y, f"Discount: ₹{discount}")
+    pdf.drawRightString(width - 60, y, f"Discount: Rs {discount:.2f}")
     y -= 25
 
     pdf.setFont("Courier-Bold", 13)
-    pdf.drawRightString(width - 60, y, f"Grand Total: ₹{round(grand_total,2)}")
+    pdf.drawRightString(width - 60, y, f"Grand Total: Rs {round(grand_total,2):.2f}")
+
+    conn.close()
 
     # ===== FOOTER =====
     y -= 50
@@ -584,8 +722,6 @@ def download_bill(order_id):
         as_attachment=False,
         mimetype="application/pdf"
     )
-
-
 
 # ======================= REPORTS =======================
 
