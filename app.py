@@ -153,7 +153,7 @@ def place_order():
 # clear orders
 @app.route('/api/clear-orders', methods=['POST'])
 def clear_orders():
-    conn = sqlite3.connect(DB)
+    conn = sqlite3.connect("restaurant.db")
     cur = conn.cursor()
 
     cur.execute("DELETE FROM orders")
@@ -162,6 +162,37 @@ def clear_orders():
     conn.close()
 
     return {"status":"cleared"}
+
+
+ @app.route('/api/orders')
+def api_orders():
+
+    conn = sqlite3.connect("restaurant.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM orders ORDER BY id DESC")
+    rows = cur.fetchall()
+
+    orders = []
+
+    for r in rows:
+        try:
+            items = json.loads(r["items"]) if r["items"] else []
+        except:
+            items = []
+
+        orders.append({
+            "id": r["id"],
+            "table_no": r["table_no"],
+            "items": items,
+            "total": r["total"],
+            "status": r["status"]
+        })
+
+    conn.close()
+
+    return jsonify(orders)
 
 
 # ======================= ADMIN AUTH =======================
