@@ -172,8 +172,11 @@ let pending = 0
 orders.forEach(o=>{
 total += o.total
 
-if(o.status=="PAID") paid++
-else pending++
+if(o.status && o.status.toUpperCase() ==="PAID") {
+  paid++}
+else {
+  pending++
+}
 })
 
 document.getElementById("totalSales").innerText = total
@@ -211,7 +214,7 @@ div.innerHTML=`
 
 <div>
 <span class="badge $
-  {o.status=="PAID"?"paid":"pending"}">
+  {o.status && o.status.toUpperCase()=="PAID"?"paid":"pending"}">
 ${o.status}
 </span>
 </div>
