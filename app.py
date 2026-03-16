@@ -259,7 +259,7 @@ from io import BytesIO
 from flask import send_file
 import json, sqlite3
 
-  @app.route('/bill/<int:order_id>/pdf')
+@app.route('/bill/<int:order_id>/pdf')
 def bill_pdf(order_id):
     con = sqlite3.connect("restaurant.db")
     cur = con.cursor()
