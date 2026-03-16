@@ -78,22 +78,27 @@ class Order(db.Model):
 @app.route('/user-dashboard/<tableno>')
 def user_dashboard(tableno='1'):
     return render_template('user-dashboard.html', tableno=tableno)
-
+    
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    conn = sqlite3.connect("restaurant.db")
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM orders WHERE status='PAID'")
 
-    cur.execute("SELECT SUM(paid_amount) FROM orders WHERE status='PAID'")
+    conn = sqlite3.connect("restaurant.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM orders")
+    orders = cur.fetchall()
+
+    cur.execute("SELECT SUM(total) FROM orders WHERE status='PAID'")
     total_sales = cur.fetchone()[0] or 0
 
- 
-    orders = cur.fetchall()
     conn.close()
 
-    return render_template("dashboard.html", orders=orders)
-
+    return render_template(
+        "dashboard.html",
+        orders=orders,
+        total_sales=total_sales
+    )
 @app.route('/api/menu')
 def get_menu():
     items = Menu.query.all()
