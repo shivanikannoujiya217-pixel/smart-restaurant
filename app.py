@@ -13,7 +13,7 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://voluble-hamster-8f55d1.netlify.app/user-dashboard.html"])
 app.secret_key = "secret"
 
 # Socket.IO for real-time updates
