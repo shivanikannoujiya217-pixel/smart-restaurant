@@ -148,6 +148,22 @@ def place_order():
 
     return jsonify({"success": True, "order_id": order_id})
 
+
+
+# clear orders
+@app.route('/api/clear-orders', methods=['POST'])
+def clear_orders():
+    conn = sqlite3.connect(DB)
+    cur = conn.cursor()
+
+    cur.execute("DELETE FROM orders")
+
+    conn.commit()
+    conn.close()
+
+    return {"status":"cleared"}
+
+
 # ======================= ADMIN AUTH =======================
 
 @app.route('/admin/login')
@@ -805,17 +821,23 @@ def menu_manager_page():
     
 @app.route('/api/orders')
 def get_orders():
-
-    conn = sqlite3.connect("restaurant.db")
-    conn.row_factory = sqlite3.Row
+    conn = sqlite3.connect(DB)
     cur = conn.cursor()
 
-    cur.execute("SELECT * FROM orders ORDER BY id DESC")
-    orders = cur.fetchall()
+    cur.execute("SELECT id, table_no, total, status FROM orders ORDER BY id DESC")
+    rows = cur.fetchall()
+
+    orders = []
+    for r in rows:
+        orders.append({
+            "id": r[0],
+            "table_no": r[1],
+            "total": r[2],
+            "status": r[3]
+        })
 
     conn.close()
-
-    return jsonify([dict(row) for row in orders])
+    return jsonify(orders)
 
 
 
