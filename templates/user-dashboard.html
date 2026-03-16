@@ -346,6 +346,7 @@ const categories = [
 
 /* -------------------- state & elements -------------------- */
 let cartData = [];
+let orders = loadOrders();
 localStorage.getItem('sr_orders')
 
 const menuEl = document.getElementById('menu');
@@ -576,9 +577,7 @@ paymentDoneBtn.onclick = ()=>{
       paymentTs: Date.now()
     };
 
-    orders.unshift(order);
-    saveOrders();
-    updateDashboard();
+    
 
     // show tracking widget for this order
     showTracker(serverId, order.status);
@@ -719,7 +718,7 @@ const categoryName = "{{ category }}";
 document.getElementById("category-title").innerText = categoryName;
 
 function loadItems() {
-    fetch("/api/menu")
+    fetch("https://smart-restaurant-1-3alo.onrender.com/api/menu")
         .then(res => res.json())
         .then(data => {
 
