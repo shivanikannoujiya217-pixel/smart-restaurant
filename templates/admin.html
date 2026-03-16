@@ -115,22 +115,31 @@ button.small{
 
   <!-- ORDERS -->
   <div class="orders">
-    <h2>📦 Recent Orders</h2>
-    <div id="ordersList"></div>
-  </div>
-
-
+   <div class="orders">
+<h2>📦 Recent Orders</h2>
 
 {% for order in orders %}
-<tr>
-    <td>{{ order.id }}</td>
-    
-</tr>
-{% endfor %}
-</table>
+<div class="order">
 
+<div class="order-header">
+<div>
+<b>Order #{{ order.id }}</b><br>
+<small>Table {{ order.table_no }}</small>
 </div>
 
+<div>
+<span class="badge {% if order.status=='PAID' %}paid{% else %}pending{% endif %}">
+{{ order.status }}
+</span>
+</div>
+</div>
+
+<p><b>Total:</b> ₹{{ order.total }}</p>
+
+</div>
+{% endfor %}
+
+</div>
 <script>
 let orders = [];
 
