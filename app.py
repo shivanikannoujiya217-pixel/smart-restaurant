@@ -128,7 +128,7 @@ def place_order():
     cur.execute("""
         INSERT INTO orders (table_no, items, total, status)
         VALUES (?, ?, ?, ?)
-    """, (table_no, items, total, "PLACED"))
+    """, (table_no, items, total, "Paid"))
 
     order_id = cur.lastrowid
     con.commit()
