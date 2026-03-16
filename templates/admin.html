@@ -139,7 +139,13 @@ button.small{
 </div>
 </div>
 
-<p><b>Total:</b> ₹{{ order.total }}</p>
+<ul>
+${o.items.map(i=>`
+<li>${i.name} x${i.qty} – ₹${i.price*i.qty}</li>
+`).join("")}
+</ul>
+
+<p><b>Total:</b> ₹${o.total}</p>
 
 </div>
 {% endfor %}
@@ -147,92 +153,82 @@ button.small{
 </div>
 <script>
 
-let orders = [];
+let orders = []
 
-function loadOrdersFromServer(){
+function loadOrders(){
 
-fetch('https://smart-restaurant-1-3alo.onrender.com/api/orders')
-.then(res => res.json())
-.then(data => {
+fetch("https://smart-restaurant-1-3alo.onrender.com/api/orders")
+.then(res=>res.json())
+.then(data=>{
 
-orders = data;
+orders = data
 
-document.getElementById("totalOrders").innerText = orders.length;
+document.getElementById("totalOrders").innerText = orders.length
 
-let total = 0;
-let paid = 0;
-let pending = 0;
+let total = 0
+let paid = 0
+let pending = 0
 
 orders.forEach(o=>{
-total += o.total;
+total += o.total
 
-if(o.status === "PAID") paid++;
-else pending++;
-});
+if(o.status=="PAID") paid++
+else pending++
+})
 
-document.getElementById("totalSales").innerText = total;
-document.getElementById("paidOrders").innerText = paid;
-document.getElementById("pendingOrders").innerText = pending;
+document.getElementById("totalSales").innerText = total
+document.getElementById("paidOrders").innerText = paid
+document.getElementById("pendingOrders").innerText = pending
 
-renderOrders();
+renderOrders()
 
-});
+})
 
 }
+
 
 function renderOrders(){
 
-const list = document.getElementById("ordersList");
-list.innerHTML = "";
+const list = document.getElementById("ordersList")
 
-if(orders.length === 0){
-list.innerHTML = "<p>No orders yet</p>";
-return;
-}
+list.innerHTML=""
 
 orders.forEach(o=>{
 
-const div = document.createElement("div");
-div.className = "order";
+const div=document.createElement("div")
 
-div.innerHTML = `
-<div class="order-header">
-<div>
+div.className="order"
+
+div.innerHTML=`
 <b>Order #${o.id}</b><br>
-<small>Table ${o.table_no}</small>
-</div>
+Table ${o.table_no}<br>
+Total ₹${o.total}<br>
+Status ${o.status}
+`
 
-<div>
-<span class="badge ${o.status === "PAID" ? "paid":"pending"}">
-${o.status}
-</span>
-</div>
-</div>
+list.appendChild(div)
 
-<p><b>Total:</b> ₹${o.total}</p>
-`;
-
-list.appendChild(div);
-
-});
+})
 
 }
+
 
 function clearAll(){
 
-if(!confirm("Delete all orders?")) return;
+if(!confirm("Delete all orders?")) return
 
-orders = [];
-document.getElementById("ordersList").innerHTML = "";
-document.getElementById("totalOrders").innerText = 0;
-document.getElementById("totalSales").innerText = 0;
-document.getElementById("paidOrders").innerText = 0;
-document.getElementById("pendingOrders").innerText = 0;
+fetch("https://smart-restaurant-1-3alo.onrender.com/api/clear-orders",{
+method:"POST"
+})
+.then(()=>{
+loadOrders()
+})
 
 }
 
-loadOrdersFromServer();
-setInterval(loadOrdersFromServer,3000);
+loadOrders()
+
+setInterval(loadOrders,3000)
 
 </script>
 
