@@ -373,7 +373,7 @@ def bill_pdf(order_id):
             mimetype="application/pdf"
         )
 
-ef create_order(table_no, items, total):
+def create_order(table_no, items, total):
     con = sqlite3.connect("restaurant.db")
     cur = con.cursor()
 
