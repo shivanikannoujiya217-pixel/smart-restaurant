@@ -116,7 +116,12 @@ button.small{
   <!-- ORDERS -->
   <div class="orders">
    <div class="orders">
+
+
+<div class="orders">
 <h2>📦 Recent Orders</h2>
+
+<div id="ordersList"></div>
 
 {% for order in orders %}
 <div class="order">
@@ -141,38 +146,44 @@ button.small{
 
 </div>
 <script>
+
 let orders = [];
 
-function loadOrders(){
-  const data = localStorage.getItem("sr_orders");
-  orders = data ? JSON.parse(data) : [];
+function loadOrdersFromServer(){
+
+fetch('/api/orders')
+.then(res => res.json())
+.then(data => {
+
+orders = data
+
+document.getElementById("totalOrders").innerText = orders.length
+
+let total = 0
+let paid = 0
+let pending = 0
+
+orders.forEach(o=>{
+total += o.total
+
+if(o.status == "PAID") paid++
+else pending++
+})
+
+document.getElementById("totalSales").innerText = total
+document.getElementById("paidOrders").innerText = paid
+document.getElementById("pendingOrders").innerText = pending
+
+})
+
 }
 
-function renderDashboard(){
-  document.getElementById("totalOrders").innerText = orders.length;
-
-  let totalSales = 0;
-  let paid = 0;
-  let pending = 0;
-
-  orders.forEach(o=>{
-    if(o.paid){
-      totalSales += o.total;
-      paid++;
-    } else {
-      pending++;
-    }
-  });
-
-  document.getElementById("totalSales").innerText = totalSales;
-  document.getElementById("paidOrders").innerText = paid;
-  document.getElementById("pendingOrders").innerText = pending;
 
   renderOrders();
 }
 
 function renderOrders(){
-  const list = document.getElementById("ordersList");
+
   list.innerHTML = "";
 
   if(orders.length === 0){
@@ -225,7 +236,7 @@ function clearAll(){
   renderDashboard();
 }
 
-loadOrders();
+
 renderDashboard();
 
 function loadOrdersFromServer(){
