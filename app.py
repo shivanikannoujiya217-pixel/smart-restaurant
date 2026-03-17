@@ -73,6 +73,9 @@ class Order(db.Model):
 
 
 # ======================= USER SIDE =======================
+@app.route("/user")
+def user():
+    return render_template("user-dashboard.html")
 
 @app.route('/')
 @app.route('/user-dashboard/<tableno>')
