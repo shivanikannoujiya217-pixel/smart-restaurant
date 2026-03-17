@@ -293,17 +293,16 @@ const categories = [
     ]
   },
 
-{
-    name: "Vegetarian",
-    folder:"Vegetarian",
-    img:"static/images/Vegetarian/cover.jpg",
-    dishes:[
-      {name:"Paneer Butter Masala", price:140, img:"static/images/Vegetarian/paneer_butter_masala.jpg", category:"Vegetarian"},
-      {name:"Veg Biryani", price:120, img:"static/images/Vegetarian/veg_biryani.jpg", category:"Vegetarian"},
-      {name:"Palak Paneer", price:130, img:"static/images/Vegetarian/palak_paneer.jpg", category:"Vegetarian"},
-      {name:"Aloo Gobi", price:80, img:"static/images/Vegetarian/aloo_gobi.jpg", category:"Vegetarian"}
-    ]
-  },
+   {
+name:"Vegetarian",
+img:"images/vegetarian/cover.jpg",
+dishes:[
+{name:"Paneer Butter Masala",price:140,img:"images/vegetarian/paneer_butter_masala.jpg"},
+{name:"Veg Biryani",price:120,img:"images/vegetarian/veg_biryani.jpg"},
+{name:"Palak Paneer",price:130,img:"images/vegetarian/palak_paneer.jpg"},
+{name:"Aloo Gobi",price:80,img:"images/vegetarian/aloo_gobi.jpg"}
+]
+},
 
 
   {
@@ -552,7 +551,7 @@ paymentDoneBtn.onclick = ()=>{
     total: Number(paymentAmount.innerText)
   };
 
-  fetch('https://smart-restaurant-1-3alo.onrender.com/place-order', {
+  fetch('/place-order', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
