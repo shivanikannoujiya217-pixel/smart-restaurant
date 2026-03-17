@@ -73,6 +73,10 @@ class Order(db.Model):
 
 
 # ======================= USER SIDE =======================
+
+@app.route("/")
+def home():
+    return "API Running"
 @app.route("/user")
 def user():
     return render_template("user-dashboard.html")
@@ -199,9 +203,7 @@ def api_orders():
 
 
 # ======================= ADMIN AUTH =======================
-@app.route("/")
-def home():
-    return "API Running"
+
 
 @app.route('/admin/login')
 def admin_login_page():
