@@ -165,23 +165,21 @@ orders = data
 
 document.getElementById("totalOrders").innerText = orders.length
 
-let total = 0
-let paid = 0
-let pending = 0
+let total = 0,
+let paid = 0,
+let pending = 0;
 
 orders.forEach(o=>{
 total += o.total
 
-if(o.status && o.status.toUpperCase() ==="PAID") {
-  paid++}
-else {
-  pending++
-}
+  o.status="Paid:;  
+  paid++;
+
 })
 
-document.getElementById("totalSales").innerText = total
-document.getElementById("paidOrders").innerText = paid
-document.getElementById("pendingOrders").innerText = pending
+document.getElementById("totalSales").innerText = total;
+document.getElementById("paidOrders").innerText = paid;
+document.getElementById("pendingOrders").innerText = 0;
 
 renderOrders()
 
@@ -215,7 +213,7 @@ div.innerHTML=`
 
 <div>
 <span class="badge $
-  {o.status && o.status.toUpperCase()=="PAID"?"paid":"pending"}">
+  {o.status.toUpperCase()=="PAID"?"paid":"pending"}">
 ${o.status}
 </span>
 </div>
