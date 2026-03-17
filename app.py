@@ -196,6 +196,9 @@ def api_orders():
 
 
 # ======================= ADMIN AUTH =======================
+@app.route("/")
+def home():
+    return "API Running"
 
 @app.route('/admin/login')
 def admin_login_page():
