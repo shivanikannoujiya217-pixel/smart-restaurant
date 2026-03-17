@@ -783,6 +783,19 @@ def download_bill(order_id):
         mimetype="application/pdf"
     )
 
+from flask import redirect
+
+@app.route('/send-whatsapp/<int:order_id>')
+def send_whatsapp(order_id):
+
+    phone = "91XXXXXXXXXX"  # 👉 yaha customer ka number daalo
+
+    message = f"Your bill is ready 🧾\nCheck here:\nhttps://smart-restaurant-1-3alo.onrender.com/bill/{order_id}"
+
+    url = f"https://wa.me/{phone}?text={message}"
+
+    return redirect(url)
+
 # ======================= REPORTS =======================
 
 import sqlite3
