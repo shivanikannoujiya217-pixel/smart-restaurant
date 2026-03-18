@@ -231,69 +231,63 @@
      static/images/<folder>/<file>.jpg
    -------------------- */
 const categories = [
-  {
-    name: "Maharashtrian",
-    folder:"maharashtrian",
-    img:"static/images/maharashtrian/cover.jpg",
-    dishes:[
-      {name:"Misal Pav", price:80,img:"static/images/maharashtrian/misal_pav.jpg", category:"Maharashtrian"},
-      {name:"Puran Poli", price:60, img:"static/images/maharashtrian/puran_poli.jpg", category:"Maharashtrian"},
-      {name:"Sabudana Khichdi", price:70, img:"static/images/maharashtrian/sabudana_khichdi.jpg", category:"Maharashtrian"},
-      {name:"Vada Pav", price:30, img:"static/images/maharashtrian/vada_pav.jpg", category:"Maharashtrian"}
-    ]
-  },
 
-  {
-    name: "South Indian",
-    folder:"south_indian",
-    img:"static/images/south_indian/cover.jpg",
-    dishes:[
-      {name:"Masala Dosa", price:90, img:"static/images/south_indian/masala_dosa.jpg", category:"South Indian"},
-      {name:"Idli Sambar", price:50, img:"static/images/south_indian/idli_sambar.jpg", category:"South Indian"},
-      {name:"Upma", price:40, img:"static/images/south_indian/upma.jpg", category:"South Indian"},
-      {name:"Medu Vada", price:60, img:"static/images/south_indian/medu_vada.jpg", category:"South Indian"}
-    ]
-  },
+{
+name:"Maharashtrian",
+img:"images/maharashtrian/cover.jpg",
+dishes:[
+{name:"Misal Pav",price:80,img:"images/maharashtrian/misal_pav.jpg"},
+{name:"Puran Poli",price:60,img:"images/maharashtrian/puran_poli.jpg"},
+{name:"Sabudana Khichdi",price:70,img:"images/maharashtrian/sabudana_khichdi.jpg"},
+{name:"Vada Pav",price:30,img:"images/maharashtrian/vada_pav.jpg"}
+]
+},
 
-  {
-    name: "Desserts",
-    folder:"desserts",
-    img:"static/images/desserts/cover.jpg",
-    dishes:[
-      {name:"Gulab Jamun", price:40, img:"static/images/desserts/gulab_jamun.jpg", category:"Desserts"},
-      {name:"Rasgulla", price:40, img:"static/images/desserts/rasgulla.jpg", category:"Desserts"},
-      {name:"Gajar Halwa", price:50, img:"static/images/desserts/gajar_halwa.jpg", category:"Desserts"},
-      {name:"Chocolate Brownie", price:80, img:"static/images/desserts/chocolate_brownie.jpg", category:"Desserts"}
-    ]
-  },
+{
+name:"South Indian",
+img:"images/south_indian/cover.jpg",
+dishes:[
+{name:"Masala Dosa",price:90,img:"images/south_indian/masala_dosa.jpg"},
+{name:"Idli Sambar",price:50,img:"images/south_indian/idli_sambar.jpg"},
+{name:"Upma",price:40,img:"images/south_indian/upma.jpg"},
+{name:"Medu Vada",price:60,img:"images/south_indian/medu_vada.jpg"}
+]
+},
 
-  {
-    name: "Rajasthani",
-    folder:"rajasthani",
-    img:"static/images/rajasthani/cover.jpg",
-    dishes:[
-      {name:"Dal Baati Churma", price:100, img:"static/images/rajasthani/dal_bati.jpg", category:"Rajasthani"},
-      {name:"Gatte ki Sabzi", price:80, img:"static/images/rajasthani/gatte_ki_sabji.jpg", category:"Rajasthani"},
-      {name:"Ker Sangri", price:90, img:"static/images/rajasthani/ker_sangri.jpg", category:"Rajasthani"},
-      {name:"Laal Maas", price:150, img:"static/images/rajasthani/laal_maas.jpg", category:"Rajasthani"}
-    ]
-  },
+{
+name:"Desserts",
+img:"images/desserts/cover.jpg",
+dishes:[
+{name:"Gulab Jamun",price:40,img:"images/desserts/gulab_jamun.jpg"},
+{name:"Rasgulla",price:40,img:"images/desserts/rasgulla.jpg"},
+{name:"Gajar Halwa",price:50,img:"images/desserts/gajar_halwa.jpg"},
+{name:"Chocolate Brownie",price:80,img:"images/desserts/chocolate_brownie.jpg"}
+]
+},
 
-  {
-    name: "Bangali",
-    folder:"bangali",
-    img:"static/images/bangali/cover.jpg",
-    dishes:[
-      {name:"Shorshe Ilish",price:160,img:"static/images/bangali/shorshe_ilish.jpg", category:"Bangali"},
-      {name:"Chingri Malai Curry",price:150,img:"static/images/bangali/chingri_malai_curry.jpg", category:"Bangali"},
-      {name:"Aloo Posto",price:70,img:"static/images/bangali/aloo_gobi.jpg", category:"Bangali"},
-      {name:"Luchi Cholar Dal",price:80,img:"static/images/bangali/Luchi_Cholar_Dal.jpg", category:"Bangali"},
-     
-      
-    ]
-  },
+{
+name:"Rajasthani",
+img:"images/rajasthani/cover.jpg",
+dishes:[
+{name:"Dal Baati Churma",price:100,img:"images/rajasthani/dal_bati.jpg"},
+{name:"Gatte ki Sabzi",price:80,img:"images/rajasthani/gatte_ki_sabji.jpg"},
+{name:"Ker Sangri",price:90,img:"images/rajasthani/ker_sangri.jpg"},
+{name:"Laal Maas",price:150,img:"images/rajasthani/laal_maas.jpg"}
+]
+},
 
-   {
+{
+name:"Bangali",
+img:"images/bangali/cover.jpg",
+dishes:[
+{name:"Shorshe Ilish",price:160,img:"images/bangali/shorshe_ilish.jpg"},
+{name:"Chingri Malai Curry",price:150,img:"images/bangali/chingri_malai_curry.jpg"},
+{name:"Aloo Posto",price:70,img:"images/bangali/aloo_posto.jpg"},
+{name:"Luchi Cholar Dal",price:80,img:"images/bangali/luchi_cholar_dal.jpg"}
+]
+},
+
+{
 name:"Vegetarian",
 img:"images/vegetarian/cover.jpg",
 dishes:[
@@ -304,44 +298,40 @@ dishes:[
 ]
 },
 
+{
+name:"Non Veg",
+img:"images/non_veg/cover.jpg",
+dishes:[
+{name:"Chicken Curry",price:150,img:"images/non_veg/chicken_curry.jpg"},
+{name:"Mutton Biryani",price:200,img:"images/non_veg/mutton_biryani.jpg"},
+{name:"Fish Fry",price:160,img:"images/non_veg/fish_fry.jpg"},
+{name:"Butter Chicken",price:180,img:"images/non_veg/butter_chicken.jpg"}
+]
+},
 
-  {
-    name: "Non-Veg",
-    folder:"non_veg",
-    img:"static/images/non_veg/cover.jpg",
-    dishes:[
-      {name:"Chicken Curry", price:150, img:"static/images/non_veg/chicken_curry.jpg", category:"Non-Veg"},
-      {name:"Mutton Biryani", price:200, img:"static/images/non_veg/mutton_biryani.jpg", category:"Non-Veg"},
-      {name:"Fish Fry", price:160, img:"static/images/non_veg/fish_fry.jpg", category:"Non-Veg"},
-      {name:"Butter Chicken", price:180, img:"static/images/non_veg/butter_chicken.jpg", category:"Non-Veg"}
-    ]
-  },
+{
+name:"Gujarati",
+img:"images/gujarati/cover.jpg",
+dishes:[
+{name:"Dhokla",price:50,img:"images/gujarati/dhokla.jpg"},
+{name:"Thepla",price:40,img:"images/gujarati/thepla.jpg"},
+{name:"Undhiyu",price:120,img:"images/gujarati/undhiyu.jpg"},
+{name:"Khandvi",price:60,img:"images/gujarati/khandvi.jpg"}
+]
+},
 
-  {
-    name: "Gujarati",
-    folder:"gujarati",
-    img:"static/images/gujarati/cover.jpg",
-    dishes:[
-      {name:"Dhokla", price:50, img:"static/images/gujarati/dhokla.jpg", category:"Gujarati"},
-      {name:"Thepla", price:40, img:"static/images/gujarati/thepla.jpg", category:"Gujarati"},
-      {name:"Undhiyu", price:120, img:"static/images/gujarati/undhiyu.jpg", category:"Gujarati"},
-      {name:"Khandvi", price:220, img:"static/images/gujarati/khandvi.jpg", category:"Gujarati"}
-    ]
-  },
+{
+name:"Punjabi",
+img:"images/punjabi/cover.jpg",
+dishes:[
+{name:"Chole Bhature",price:90,img:"images/punjabi/chole_bhature.jpg"},
+{name:"Dal Makhani",price:120,img:"images/punjabi/dal_makhani.jpg"},
+{name:"Paneer Tikka",price:140,img:"images/punjabi/paneer_tikka.jpg"},
+{name:"Amritsari Kulcha",price:110,img:"images/punjabi/amritsari_kulcha.jpg"}
+]
+}
 
-  {
-    name: "Punjabi",
-    folder:"punjabi",
-    img:"static/images/punjabi/cover.jpg",
-    dishes:[
-      {name:"Chole Bhature", price:90, img:"static/images/punjabi/chole_bhature.jpg", category:"Punjabi"},
-      {name:"Dal Makhani", price:120, img:"static/images/punjabi/dal_makhani.jpg", category:"Punjabi"},
-      {name:"Paneer Tikka", price:140, img:"static/images/punjabi/paneer_tikka.jpg", category:"Punjabi"},
-      {name:"Amritsari Kulcha", price:200, img:"static/images/punjabi/amritsari_kulcha.jpg", category:"Punjabi"}
-    ]
-  }
 ];
-
 
 /* -------------------- state & elements -------------------- */
 let cartData = [];
