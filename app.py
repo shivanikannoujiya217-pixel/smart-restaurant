@@ -126,7 +126,7 @@ def place_order():
 
     table_no = data['table_no']
     items = json.dumps(data['items'])
-    total = data['total']   step4 walcode add karo
+    total = data['total']   
 
     con = sqlite3.connect("restaurant.db")
     cur = con.cursor()
