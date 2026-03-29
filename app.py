@@ -70,7 +70,7 @@ class Order(db.Model):
     items = db.Column(db.Text)
     total = db.Column(db.Float)
     status = db.Column(db.String(20), default="paid")
-    customer_phone = db.Column(db.String(15))
+    
 
 
 # ======================= USER SIDE =======================
@@ -126,22 +126,21 @@ def place_order():
 
     table_no = data['table_no']
     items = json.dumps(data['items'])
-    total = data['total']
-    phone = data.get('phone')   # ✅ ADD THIS
+    total = data['total']   step4 walcode add karo
 
     con = sqlite3.connect("restaurant.db")
     cur = con.cursor()
 
-    # ✅ UPDATED QUERY (phone add kiya)
+    # create order with initial status PLACED (will be updated when admin accepts / prepares)
     cur.execute("""
-        INSERT INTO orders (table_no, items, total, status, customer_phone)
-        VALUES (?, ?, ?, ?, ?)
-    """, (table_no, items, total, "Paid", phone))
+        INSERT INTO orders (table_no, items, total, status)
+        VALUES (?, ?, ?, ?)
+    """, (table_no, items, total, "Paid"))
 
     order_id = cur.lastrowid
     con.commit()
 
-    # Emit real-time event
+    # Emit real-time event so user's phone and admin dashboards can update
     try:
         socketio.emit('order_update', {
             'order_id': order_id,
@@ -514,11 +513,6 @@ def payment_success(order_id):
 
 @app.route('/admin')
 def admin_home():
-    orders = Order.query.all()
-
-    for order in orders:
-        message = f"Order ID: {order.id}\nTotal: ₹{order.total}"
-        order.encoded_message = urllib.parse.quote(message)
     if not session.get('admin'):
         return redirect('/admin/login')
     return render_template('admin.html')
