@@ -76,15 +76,7 @@
   .btn.ghost{background:transparent;color:var(--muted);border:1px solid #e9e9ef}
 </style>
 </head>
- <form method="POST" action="/place-order">
 
-    <!-- items selection -->
-
-    <input type="text" name="phone" placeholder="Enter Phone Number" required>
-
-    <button type="submit">Place Order</button>
-
-</form>
 <body>
 
 <header>
@@ -359,7 +351,7 @@ const categories = [
 let cartData = [];
 let orders = loadOrders();
 localStorage.getItem('sr_orders')
-const phone = document.getElementById("phone").value;
+
 const menuEl = document.getElementById('menu');
 const popup = document.getElementById('popup');
 const popupContent = document.getElementById('popupContent');
@@ -562,7 +554,7 @@ paymentDoneBtn.onclick = ()=>{
     table_no: tableNumberInput.value || 1,
     items: cartData,
     total: Number(paymentAmount.innerText)
-    phone: phone
+    
   };
 
   fetch('/place-order', {
