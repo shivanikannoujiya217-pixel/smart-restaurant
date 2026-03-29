@@ -86,7 +86,9 @@ def user():
 @app.route('/user-dashboard/<tableno>')
 def user_dashboard(tableno='1'):
     return render_template('user-dashboard.html', tableno=tableno)
-    
+
+import urllib.parse   # ✅ top me add karo
+
 @app.route('/admin/dashboard')
 def admin_dashboard():
 
@@ -97,6 +99,20 @@ def admin_dashboard():
     cur.execute("SELECT * FROM orders")
     orders = cur.fetchall()
 
+    # ✅ ADD THIS PART (VERY IMPORTANT)
+    updated_orders = []
+    for order in orders:
+        msg = f"Your bill is ready 🧾\nCheck here:\nhttps://smart-restaurant-1-3alo.onrender.com/bill/{order['id']}"
+        
+        encoded_msg = urllib.parse.quote(msg, safe='')
+
+        # dict bana ke message attach karo
+        order_dict = dict(order)
+        order_dict['encoded_message'] = encoded_msg
+
+        updated_orders.append(order_dict)
+
+    # sales
     cur.execute("SELECT SUM(total) FROM orders WHERE status='PAID'")
     total_sales = cur.fetchone()[0] or 0
 
@@ -104,9 +120,11 @@ def admin_dashboard():
 
     return render_template(
         "dashboard.html",
-        orders=orders,
+        orders=updated_orders,   # ✅ CHANGE HERE
         total_sales=total_sales
     )
+    
+
 @app.route('/api/menu')
 def get_menu():
     items = Menu.query.all()
