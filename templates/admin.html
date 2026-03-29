@@ -131,7 +131,9 @@ button.small{
 <b>Order #{{ order.id }}</b><br>
 <small>Table {{ order.table_no }}</small>
 </div>
-
+<a href="https://wa.me/91{{ order.customer_phone }}?text={{ order.encoded_message }}" target="_blank">
+    <button>WhatsApp</button>
+</a>
 <div>
 <span class="badge {% if order.status=='PAID' %}paid{% else %}pending{% endif %}">
 {{ order.status }}
