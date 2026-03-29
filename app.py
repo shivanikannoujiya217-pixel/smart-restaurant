@@ -120,7 +120,6 @@ def save_menu():
     # insert / update menu_items
     return jsonify({"status": "ok"})
 
-
 @app.route('/place-order', methods=['POST'])
 def place_order():
     data = request.get_json()
@@ -128,25 +127,26 @@ def place_order():
     table_no = data['table_no']
     items = json.dumps(data['items'])
     total = data['total']
+    phone = data.get('phone')   # ✅ ADD THIS
 
     con = sqlite3.connect("restaurant.db")
     cur = con.cursor()
 
-    # create order with initial status PLACED (will be updated when admin accepts / prepares)
+    # ✅ UPDATED QUERY (phone add kiya)
     cur.execute("""
-        INSERT INTO orders (table_no, items, total, status)
-        VALUES (?, ?, ?, ?)
-    """, (table_no, items, total, "Paid"))
+        INSERT INTO orders (table_no, items, total, status, customer_phone)
+        VALUES (?, ?, ?, ?, ?)
+    """, (table_no, items, total, "Paid", phone))
 
     order_id = cur.lastrowid
     con.commit()
 
-    # Emit real-time event so user's phone and admin dashboards can update
+    # Emit real-time event
     try:
         socketio.emit('order_update', {
             'order_id': order_id,
             'table_no': table_no,
-            'status': 'PLACED',
+            'status': 'Paid',
             'total': total
         }, broadcast=True)
     except Exception:
@@ -155,6 +155,7 @@ def place_order():
     con.close()
 
     return jsonify({"success": True, "order_id": order_id})
+
 
 
 
@@ -232,6 +233,7 @@ import sqlite3
 from datetime import datetime
 import sqlite3, json
 from flask import render_template
+
 @app.route('/bill/<int:order_id>')
 def show_bill(order_id):
 
@@ -512,6 +514,11 @@ def payment_success(order_id):
 
 @app.route('/admin')
 def admin_home():
+    orders = Order.query.all()
+
+    for order in orders:
+        message = f"Order ID: {order.id}\nTotal: ₹{order.total}"
+        order.encoded_message = urllib.parse.quote(message)
     if not session.get('admin'):
         return redirect('/admin/login')
     return render_template('admin.html')
