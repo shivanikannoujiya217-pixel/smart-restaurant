@@ -76,6 +76,15 @@
   .btn.ghost{background:transparent;color:var(--muted);border:1px solid #e9e9ef}
 </style>
 </head>
+ <form method="POST" action="/place-order">
+
+    <!-- items selection -->
+
+    <input type="text" name="phone" placeholder="Enter Phone Number" required>
+
+    <button type="submit">Place Order</button>
+
+</form>
 <body>
 
 <header>
@@ -350,7 +359,7 @@ const categories = [
 let cartData = [];
 let orders = loadOrders();
 localStorage.getItem('sr_orders')
-
+const phone = document.getElementById("phone").value;
 const menuEl = document.getElementById('menu');
 const popup = document.getElementById('popup');
 const popupContent = document.getElementById('popupContent');
@@ -384,6 +393,7 @@ const dashTopDish = document.getElementById('dashTopDish');
 const dashTopCategory = document.getElementById('dashTopCategory');
 const recentOrdersEl = document.getElementById('recentOrders');
 const categoryChartCanvas = document.getElementById('categoryChart');
+
 
 /* -------------------- utils -------------------- */
 function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
@@ -552,6 +562,7 @@ paymentDoneBtn.onclick = ()=>{
     table_no: tableNumberInput.value || 1,
     items: cartData,
     total: Number(paymentAmount.innerText)
+    phone: phone
   };
 
   fetch('/place-order', {
@@ -575,7 +586,7 @@ paymentDoneBtn.onclick = ()=>{
       total: Number(paymentAmount.innerText),
       ts: Date.now(),
       paid: true,
-      status: 'PLACED',
+      status: 'Paid',
       paymentTs: Date.now()
     };
 
