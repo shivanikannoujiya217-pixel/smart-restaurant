@@ -69,7 +69,8 @@ class Order(db.Model):
     table_no = db.Column(db.String(10))
     items = db.Column(db.Text)
     total = db.Column(db.Float)
-    status = db.Column(db.String(20), default="PLACED")
+    status = db.Column(db.String(20), default="paid")
+    customer_phone = db.Column(db.String(15))
 
 
 # ======================= USER SIDE =======================
