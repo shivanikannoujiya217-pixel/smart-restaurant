@@ -808,21 +808,36 @@ from flask import redirect
 import urllib.parse
 import sqlite3
 
+
+
+    from flask import redirect
+import urllib.parse
+import sqlite3
+
 @app.route('/send-whatsapp/<int:order_id>')
 def send_whatsapp(order_id):
     conn = sqlite3.connect("restaurant.db")
     cur = conn.cursor()
-    cur.execute("SELECT id FROM orders WHERE id=?", (order_id,))
-    row = cur.fetchone()
+
+    # Order + total fetch karo
+    cur.execute("SELECT id, total_amount FROM orders WHERE id=?", (order_id,))
+    order = cur.fetchone()
+
     conn.close()
-    
-    if not row:
+
+    if not order:
         return "Order ID not found", 404
 
-    phone = "918828965238"  # 👈 apna real number
+    phone = "919876543210"  # 👈 apna number
 
-    message = f"Your bill is ready\nCheck here:\nhttps://smart-restaurant-1-3alo.onrender.com/bill/{order_id}"
-    
+    # 👇 Message WITHOUT link
+    message = f"""🧾 Smart Restaurant Bill
+
+Order ID: {order[0]}
+Total Amount: ₹{order[1]}
+
+Thank you for your visit 😊"""
+
     message_encoded = urllib.parse.quote(message)
 
     url = f"https://wa.me/{phone}?text={message_encoded}"
