@@ -828,7 +828,7 @@ def send_whatsapp(order_id):
     if not order:
         return "Order ID not found", 404
 
-    phone = "919876543210"  # 👈 apna number
+    phone = "918828965238"  # 👈 apna number
 
     # 👇 Message WITHOUT link
     message = f"""🧾 Smart Restaurant Bill
