@@ -810,7 +810,6 @@ import sqlite3
 
 @app.route('/send-whatsapp/<int:order_id>')
 def send_whatsapp(order_id):
-    # check order exists
     conn = sqlite3.connect("restaurant.db")
     cur = conn.cursor()
     cur.execute("SELECT id FROM orders WHERE id=?", (order_id,))
@@ -818,12 +817,16 @@ def send_whatsapp(order_id):
     conn.close()
     
     if not row:
-        return "Order ID not found", 404  # avoids 500
+        return "Order ID not found", 404
 
-    phone = "91XXXXXXXXXX" # 👈 real number
-    message = f"Your bill is ready 🧾\nCheck here:\nhttps://smart-restaurant-1-3alo.onrender.com/bill/{order_id}"
+    phone = "918828965238"  # 👈 apna real number
+
+    message = f"Your bill is ready\nCheck here:\nhttps://smart-restaurant-1-3alo.onrender.com/bill/{order_id}"
+    
     message_encoded = urllib.parse.quote(message)
+
     url = f"https://wa.me/{phone}?text={message_encoded}"
+
     return redirect(url)
 
 # ======================= REPORTS =======================
