@@ -803,33 +803,27 @@ def download_bill(order_id):
         mimetype="application/pdf"
     )
     
-from flask import redirect, request
+from flask import redirect
 import urllib.parse
 import sqlite3
+
 @app.route('/send-whatsapp/<int:order_id>')
 def send_whatsapp(order_id):
-    import urllib.parse
-    from flask import redirect
+    # check order exists
+    conn = sqlite3.connect("restaurant.db")
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM orders WHERE id=?", (order_id,))
+    row = cur.fetchone()
+    conn.close()
+    
+    if not row:
+        return "Order ID not found", 404  # avoids 500
 
-    phone = "91xxxxxxxxxx"
-
-    bill_link = f"https://smart-restaurant-1-3alo.onrender.com/bill/{order_id}"
-
-    message = f"""🧾 Your Bill is Ready
-
-Order ID: {order[0]}
-Total Amount: ₹{order[1]}
-
-Download Bill:
-{bill_link}
-
-Thank you 😊"""
-
+    phone = "91XXXXXXXXXX" # 👈 real number
+    message = f"Your bill is ready 🧾\nCheck here:\nhttps://smart-restaurant-1-3alo.onrender.com/bill/{order_id}"
     message_encoded = urllib.parse.quote(message)
-
     url = f"https://wa.me/{phone}?text={message_encoded}"
-
-    return redirect(url)
+    return redirect(url)   
 
 
 
